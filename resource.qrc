@@ -1,0 +1,29 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/JamiatApp/main.qml</file>
+        <file>qml/JamiatApp/MainView.qml</file>
+        <file>qml/JamiatApp/PostItem.qml</file>
+        <file>qml/JamiatApp/PostItemBase.qml</file>
+        <file>qml/JamiatApp/JamiatImage.qml</file>
+        <file>qml/JamiatApp/MaterialDesignButton.qml</file>
+        <file>qml/JamiatApp/JamiatRefreshing.qml</file>
+        <file>qml/JamiatApp/SideMenuList.qml</file>
+        <file>qml/JamiatApp/PostItemTitleBar.qml</file>
+        <file>qml/JamiatApp/JamiatImageList.qml</file>
+        <file>qml/JamiatApp/files/search.png</file>
+        <file>qml/JamiatApp/files/icon.png</file>
+        <file>qml/JamiatApp/files/share.png</file>
+        <file>qml/JamiatApp/files/menu.png</file>
+        <file>qml/JamiatApp/files/share-light.png</file>
+        <file>qml/JamiatApp/files/cover.jpg</file>
+        <file>qml/JamiatApp/EventsList.qml</file>
+        <file>qml/JamiatApp/EventView.qml</file>
+        <file>qml/JamiatApp/About.qml</file>
+        <file>qml/JamiatApp/AboutNileTeam.qml</file>
+        <file>qml/JamiatApp/files/jamiat.png</file>
+        <file>qml/JamiatApp/files/nilegroup.png</file>
+        <file>qml/JamiatApp/AboutJamiat.qml</file>
+        <file>qml/JamiatApp/OpenSourceProjects.qml</file>
+        <file>qml/JamiatApp/files/cover2.jpg</file>
+    </qresource>
+</RCC>
