@@ -32,6 +32,18 @@ Rectangle {
         color: "#A80807"
     }
 
+    Header {
+        id: title
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.topMargin: View.statusBarHeight
+        anchors.right: parent.right
+        titleFont.pixelSize: 13*Devices.fontDensity
+        text: qsTr("About")
+        light: true
+        backButton: false
+    }
+
     Flickable {
         id: flickable
         anchors.top: header.bottom

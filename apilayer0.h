@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QDateTime>
 #include <QStringList>
+#include <QTcpSocket>
 
 class ApiLayer0_ItemStruct
 {
@@ -25,7 +26,6 @@ public:
     int type;
 };
 
-class QTcpSocket;
 class ApiLayer0Private;
 class ApiLayer0 : public QObject
 {
@@ -74,6 +74,7 @@ signals:
     void searchRequestAnswer(qint64 id, const QList<ApiLayer0_ItemStruct> &items);
     void lastEventsRequestAnswer(qint64 id, const QList<ApiLayer0_ItemStruct> &items);
     void fetchEventsRequestAnswer(qint64 id, const QList<ApiLayer0_ItemStruct> &items);
+    void error(const QString &text);
 
 private slots:
     void onReadyRead();
@@ -83,9 +84,20 @@ private slots:
     void onLastEventsRequestAnswer(QByteArray data);
     void onFetchEventsRequestAnswer(QByteArray data);
 
+    void error_prv(QAbstractSocket::SocketError socketError);
+
 private:
     void write(QByteArray data);
     QByteArray read(qint64 maxlen = 0);
+    QTcpSocket *getSocket();
+
+    void startTimeOut(qint64 id);
+    void checkTimeOut(qint64 id);
+
+    void initSocket();
+
+protected:
+    void timerEvent(QTimerEvent *e);
 
 private:
     ApiLayer0Private *p;

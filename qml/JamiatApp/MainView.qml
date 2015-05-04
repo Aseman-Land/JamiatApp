@@ -14,6 +14,7 @@ Rectangle {
     property bool viewMode: false
 
     signal searchRequest()
+    signal error(string text)
 
     onViewModeChanged: {
         materialDesignButton.show()
@@ -32,6 +33,7 @@ Rectangle {
     MainPageModel{
         id: main_model
         keyword: search_line.text
+        onError: mview.error(text)
         Component.onCompleted: readHistory()
     }
 
@@ -82,15 +84,20 @@ Rectangle {
                 materialDesignButton.show()
         }
 
-        footer: Indicator {
+        footer: Item {
             width: cflw.width
-            height: 120*Devices.density
-            light: false
-            modern: true
-            indicatorSize: 18*Devices.density
+            height: 120*Devices.density + View.navigationBarHeight
 
-            property bool active: main_model.refreshing
-            onActiveChanged: active? start() : stop()
+            Indicator {
+                width: parent.width
+                height: parent.height - View.navigationBarHeight
+                light: false
+                modern: true
+                indicatorSize: 18*Devices.density
+
+                property bool active: main_model.refreshing
+                onActiveChanged: active? start() : stop()
+            }
         }
 
         delegate: Item {
@@ -192,8 +199,10 @@ Rectangle {
         buttonColor: viewMode? privates.item.bodyColor : titleBarColor
         buttonIcon: viewMode? "files/share-light.png" : "files/search.png"
         onClicked: {
-            if(viewMode)
+            if(viewMode) {
+                startIndicator(1000)
                 Devices.share(privates.item.postTitle, privates.item.postBody)
+            }
             else
                 mview.searchRequest()
         }

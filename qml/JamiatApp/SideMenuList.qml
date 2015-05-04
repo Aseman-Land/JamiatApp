@@ -21,7 +21,7 @@ Rectangle {
             Rectangle {
                 anchors.fill: parent
                 opacity: 0.6
-                color: marea.pressed? masterPalette.highlight : "#00000000"
+                color: marea.pressed? "#0d80ec" : "#00000000"
             }
 
             Text {

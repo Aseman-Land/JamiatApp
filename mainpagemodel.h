@@ -77,6 +77,7 @@ signals:
     void refreshingChanged();
     void keywordChanged();
     void eventIdChanged();
+    void error(const QString &text);
 
 private slots:
     void updateRequestAnswer(qint64 id, const QList<ApiLayer0_ItemStruct> &items);
@@ -85,6 +86,7 @@ private slots:
     void fetchEventsRequestAnswer(qint64 id, const QList<ApiLayer0_ItemStruct> &items);
 
     void clearGarbages();
+    void error_prv(const QString &text);
 
 private:
     void refresh_prv(QList<ApiLayerItemStruct> items);

@@ -5,7 +5,7 @@
     <name>About</name>
     <message>
         <source>This App is a free and opensource application by Nile Team</source>
-        <translation>این برنامه یک برنامه‌ی آزاد و منبع‌باز است که توسط گروه نیل طراحی و پیاده‌سازی و به جمعیت امام علی (ع) اهدا شده است</translation>
+        <translation>این برنامه یک برنامه‌ی آزاد و منبع‌باز است که توسط گروه نیل طراحی و پیاده‌سازی شده است</translation>
     </message>
     <message>
         <source>This App is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</source>
@@ -24,6 +24,10 @@
     <message>
         <source>Jamiat App Github</source>
         <translation>گیت‌هاب برنامه</translation>
+    </message>
+    <message>
+        <source>About</source>
+        <translation>درباره‌ی برنامه</translation>
     </message>
 </context>
 <context>

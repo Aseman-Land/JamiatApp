@@ -61,15 +61,20 @@ Rectangle {
             model: main_model
             clip: true
 
-            footer: Indicator {
+            footer: Item {
                 width: listv.width
-                height: 120*Devices.density
-                light: false
-                modern: true
-                indicatorSize: 18*Devices.density
+                height: 120*Devices.density + View.navigationBarHeight
 
-                property bool active: main_model.refreshing
-                onActiveChanged: active? start() : stop()
+                Indicator {
+                    width: parent.width
+                    height: parent.height - View.navigationBarHeight
+                    light: false
+                    modern: true
+                    indicatorSize: 18*Devices.density
+
+                    property bool active: main_model.refreshing
+                    onActiveChanged: active? start() : stop()
+                }
             }
 
             delegate: Item {
@@ -90,7 +95,7 @@ Rectangle {
                     anchors.topMargin: 8*Devices.density
                     anchors.leftMargin: 8*Devices.density
                     anchors.rightMargin: 8*Devices.density
-                    color: "#fcfcfc"
+                    color: marea.pressed? "#FFE8DA" : "#fcfcfc"
                     border.width: 1*Devices.density
                     border.color: "#dddddd"
 
@@ -129,6 +134,7 @@ Rectangle {
                 }
 
                 MouseArea {
+                    id: marea
                     anchors.fill: parent
                     onClicked: {
                         viewItem = event_component.createObject(view_scene, {"eventId": modelItem.eventId})

@@ -24,6 +24,10 @@
         <source>Jamiat App Github</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>About</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>AboutJamiat</name>

@@ -41,15 +41,20 @@ Item {
             NumberAnimation{ easing.type: Easing.OutCirc; duration: 300 }
         }
 
-        footer: Indicator {
+        footer: Item {
             width: listv.width
-            height: 120*Devices.density
-            light: false
-            modern: true
-            indicatorSize: 18*Devices.density
+            height: 120*Devices.density + View.navigationBarHeight
 
-            property bool active: main_model.refreshing
-            onActiveChanged: active? start() : stop()
+            Indicator {
+                width: parent.width
+                height: parent.height - View.navigationBarHeight
+                light: false
+                modern: true
+                indicatorSize: 18*Devices.density
+
+                property bool active: main_model.refreshing
+                onActiveChanged: active? start() : stop()
+            }
         }
 
         delegate: Item {
@@ -96,7 +101,10 @@ Item {
         anchors.fill: parent
         buttonColor: "#FA9401"
         buttonIcon: "files/share-light.png"
-        onClicked: Devices.share(privates.item.postTitle, privates.item.postBody)
+        onClicked: {
+            startIndicator(1000)
+            Devices.share(privates.item.postTitle, privates.item.postBody)
+        }
         Component.onCompleted: hide()
     }
 

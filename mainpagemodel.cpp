@@ -26,6 +26,9 @@
 #include <QDebug>
 #include <QTimer>
 
+ApiLayer0 *jamiat_api_layer0 = 0;
+QSet<MainPageModel*> all_main_model_objects;
+
 class MainPageModelPrivate
 {
 public:
@@ -34,7 +37,6 @@ public:
     QList<ApiLayerItemStruct> lastSearch;
 
     QList<MainPageModelItem*> items;
-    ApiLayer0 *api;
     QString keyword;
     QString eventId;
 
@@ -67,20 +69,25 @@ MainPageModel::MainPageModel(QObject *parent) :
     p->calendar = new AsemanCalendarConverter(this);
     p->calendar->setCalendar(AsemanCalendarConverterCore::Jalali);
 
-    p->api = new ApiLayer0(this);
+    if(!jamiat_api_layer0)
+        jamiat_api_layer0 = new ApiLayer0();
+
     p->cache = new CacheDatabase(this);
 
-    connect(p->api, SIGNAL(lastEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
+    connect(jamiat_api_layer0, SIGNAL(lastEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
             SLOT(lastEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)));
-    connect(p->api, SIGNAL(searchRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
+    connect(jamiat_api_layer0, SIGNAL(searchRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
             SLOT(searchRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)));
-    connect(p->api, SIGNAL(updateRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
+    connect(jamiat_api_layer0, SIGNAL(updateRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
             SLOT(updateRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)));
-    connect(p->api, SIGNAL(fetchEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
+    connect(jamiat_api_layer0, SIGNAL(fetchEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
             SLOT(fetchEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)));
+    connect(jamiat_api_layer0, SIGNAL(error(QString)), SLOT(error_prv(QString)));
 
     connect(p->refreshTimer, SIGNAL(timeout()), SLOT(refresh()));
     connect(p->garbageTimer, SIGNAL(timeout()), SLOT(clearGarbages()));
+
+    all_main_model_objects.insert(this);
 }
 
 int MainPageModel::id(const QModelIndex &index) const
@@ -211,21 +218,21 @@ void MainPageModel::refresh()
     if(!p->eventId.isEmpty())
     {
         refresh_prv( p->cache->fetchEvents(p->eventId, 10) );
-        qint64 leId = p->api->lastEventsRequest(p->eventId, 0, 10);
+        qint64 leId = jamiat_api_layer0->lastEventsRequest(p->eventId, 0, 10);
         p->waitingIds.insert(leId);
     }
     else
     if(p->keyword.isEmpty())
     {
-        qint64 leId = p->api->lastEventsRequest(QString(), 0, 1);
-        qint64 udId = p->api->updateRequest(0, 10);
+        qint64 leId = jamiat_api_layer0->lastEventsRequest(QString(), 0, 1);
+        qint64 udId = jamiat_api_layer0->updateRequest(0, 10);
 
         p->waitingIds.insert(leId);
         p->waitingIds.insert(udId);
     }
     else
     {
-        qint64 sId = p->api->searchRequest(p->keyword, 0, 10);
+        qint64 sId = jamiat_api_layer0->searchRequest(p->keyword, 0, 10);
         p->waitingIds.insert(sId);
     }
 
@@ -237,7 +244,7 @@ void MainPageModel::showEvents()
 {
     refresh_prv(p->cache->readEvents(10));
 
-    qint64 eId = p->api->fetchEventsRequest(0, 10);
+    qint64 eId = jamiat_api_layer0->fetchEventsRequest(0, 10);
     p->waitingIds.insert(eId);
 
     p->loadMoreState = false;
@@ -253,12 +260,12 @@ void MainPageModel::loadMore()
 
     if(p->keyword.isEmpty())
     {
-        qint64 udId = p->api->updateRequest(p->items.count()-1, 10);
+        qint64 udId = jamiat_api_layer0->updateRequest(p->items.count()-1, 10);
         p->waitingIds.insert(udId);
     }
     else
     {
-        qint64 sId = p->api->searchRequest(p->keyword, p->items.count(), 10);
+        qint64 sId = jamiat_api_layer0->searchRequest(p->keyword, p->items.count(), 10);
         p->waitingIds.insert(sId);
     }
 
@@ -390,8 +397,19 @@ void MainPageModel::insertGarbage(QObject *obj)
     p->garbageTimer->start();
 }
 
+void MainPageModel::error_prv(const QString &text)
+{
+    emit error(text);
+
+    p->waitingIds.clear();
+    emit refreshingChanged();
+}
+
 void MainPageModel::updateRequestAnswer(qint64 id, const QList<ApiLayerItemStruct> &items)
 {
+    if(!p->waitingIds.contains(id))
+        return;
+
     if(p->loadMoreState)
         p->lastItems << items;
     else
@@ -410,6 +428,9 @@ void MainPageModel::updateRequestAnswer(qint64 id, const QList<ApiLayerItemStruc
 
 void MainPageModel::searchRequestAnswer(qint64 id, const QList<ApiLayerItemStruct> &items)
 {
+    if(!p->waitingIds.contains(id))
+        return;
+
     if(p->loadMoreState)
         p->lastSearch << items;
     else
@@ -424,6 +445,9 @@ void MainPageModel::searchRequestAnswer(qint64 id, const QList<ApiLayerItemStruc
 
 void MainPageModel::lastEventsRequestAnswer(qint64 id, const QList<ApiLayerItemStruct> &items)
 {
+    if(!p->waitingIds.contains(id))
+        return;
+
     if(!p->eventId.isEmpty())
     {
         refresh_prv(items);
@@ -458,6 +482,9 @@ void MainPageModel::lastEventsRequestAnswer(qint64 id, const QList<ApiLayerItemS
 
 void MainPageModel::fetchEventsRequestAnswer(qint64 id, const QList<ApiLayerItemStruct> &items)
 {
+    if(!p->waitingIds.contains(id))
+        return;
+
     refresh_prv(items);
     p->cache->write(items);
 
@@ -467,6 +494,12 @@ void MainPageModel::fetchEventsRequestAnswer(qint64 id, const QList<ApiLayerItem
 
 MainPageModel::~MainPageModel()
 {
+    all_main_model_objects.remove(this);
+    if(all_main_model_objects.isEmpty())
+    {
+        delete jamiat_api_layer0;
+        jamiat_api_layer0 = 0;
+    }
     delete p;
 }
 

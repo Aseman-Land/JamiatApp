@@ -55,18 +55,41 @@ Item {
                 fillMode: Image.PreserveAspectFit
                 sourceSize: Qt.size(width, height)
                 source: buttonIcon
+                visible: !indicator.active
                 transform: Scale {
                     origin.x: button_img.width/2
                     origin.y: button_img.height
                     xScale: View.layoutDirection==Qt.RightToLeft? -1 : 1
                 }
             }
+
+            Indicator {
+                id: indicator
+                anchors.fill: parent
+                modern: true
+                light: true
+                indicatorSize: 18*Devices.density
+
+                property bool active: false
+                onActiveChanged: {
+                    if(active)
+                        start()
+                    else
+                        stop()
+                }
+            }
         }
 
         MouseArea {
             anchors.fill: parent
-            onClicked: md_btn.clicked()
+            onClicked: if(!indicator.active) md_btn.clicked()
         }
+    }
+
+    Timer {
+        id: indicator_timer
+        repeat: false
+        onTriggered: indicator.active = false
     }
 
     function hide() {
@@ -75,6 +98,12 @@ Item {
 
     function show() {
         hideState = false
+    }
+
+    function startIndicator(interval) {
+        indicator.active = true
+        indicator_timer.interval = interval
+        indicator_timer.restart()
     }
 }
 
