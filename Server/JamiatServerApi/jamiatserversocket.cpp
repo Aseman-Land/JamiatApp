@@ -16,6 +16,8 @@
 #include <QDateTime>
 #include <QDebug>
 
+QList<QHostAddress> blocked_sockets;
+
 class JamiatServerSocketPrivate
 {
 public:
@@ -105,7 +107,7 @@ void JamiatServerSocket::init_apis()
 
 void JamiatServerSocket::write(QByteArray data)
 {
-    p->socket->write(data.replace("\n", "\r") + "\n");
+    p->socket->write(data.replace("\n", "\r\t\t\r") + "\n");
     p->socket->flush();
 }
 
@@ -113,7 +115,7 @@ QByteArray JamiatServerSocket::read(qint64 maxlen)
 {
     QByteArray data = p->socket->readLine(maxlen);
     data.replace("\n", "");
-    data.replace("\r", "\n");
+    data.replace("\r\t\t\r", "\n");
 
     return data;
 }
@@ -129,6 +131,7 @@ void JamiatServerSocket::start()
         return;
 
     p->socket = new QTcpSocket(this);
+    p->socket->setReadBufferSize(1<<13);
 
     connect(p->socket, SIGNAL(disconnected()), SIGNAL(disconnected()));
     connect(p->socket, SIGNAL(readyRead())   , SLOT(readyRead())     );
@@ -136,19 +139,25 @@ void JamiatServerSocket::start()
     p->socket->setSocketDescriptor(p->descriptor);
 
     qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << "new peer socket connected:" << p->socket->peerAddress();
+
+    if(blocked_sockets.contains(p->socket->peerAddress()))
+    {
+        emit disconnected();
+        return;
+    }
 }
 
 void JamiatServerSocket::readyRead()
 {
     qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << "Got a reply from:" << p->socket->peerAddress();
-    const int maxSize = 1<<10;
+    const int maxSize = 1<<12;
     while(p->socket->canReadLine())
     {
         QByteArray data = read(maxSize);
         if(data.length() == maxSize)
         {
             p->socket->close();
-            emit blockThisShit(p->socket->peerAddress());
+            blockThisShit(p->socket->peerAddress());
             return;
         }
 
@@ -177,6 +186,14 @@ void JamiatServerSocket::readyRead()
 
         write(result);
     }
+}
+
+void JamiatServerSocket::blockThisShit(const QHostAddress &host)
+{
+    if(blocked_sockets.contains(host))
+        return;
+
+    blocked_sockets.append(host);
 }
 
 QByteArray JamiatServerSocket::callServiceApi0(qint64 id, const QByteArray &data)

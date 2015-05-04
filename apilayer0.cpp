@@ -4,6 +4,7 @@
 #include <QDataStream>
 #include <QPointer>
 #include <QTimerEvent>
+#include <QQueue>
 
 class ApiLayer0Private
 {
@@ -12,6 +13,7 @@ public:
     QPointer<QTcpSocket> socket;
 
     QHash<qint64, int> waitingList;
+    QQueue<QByteArray> queue;
 };
 
 ApiLayer0::ApiLayer0(QObject *parent) :
@@ -30,10 +32,13 @@ void ApiLayer0::initSocket()
     p->socket = new QTcpSocket(this);
 //    p->socket->connectToHost("127.0.0.1", 34946);
     p->socket->connectToHost("aseman.land", 34946);
-    p->socket->waitForConnected();
 
-    connect(p->socket, SIGNAL(readyRead())                        , SLOT(onReadyRead())                          );
-    connect(p->socket, SIGNAL(error(QAbstractSocket::SocketError)), SLOT(error_prv(QAbstractSocket::SocketError)), Qt::QueuedConnection);
+    qRegisterMetaType<QAbstractSocket::SocketError>("QAbstractSocket::SocketError");
+
+    connect(p->socket, SIGNAL(readyRead()), SLOT(onReadyRead()) );
+    connect(p->socket, SIGNAL(error(QAbstractSocket::SocketError)),
+            SLOT(error_prv(QAbstractSocket::SocketError)), Qt::QueuedConnection);
+    connect(p->socket, SIGNAL(connected()), SLOT(writeQueue())  );
 }
 
 qint64 ApiLayer0::updateRequest(int offset, int limit)
@@ -522,17 +527,30 @@ void ApiLayer0::error_prv(QAbstractSocket::SocketError socketError)
     emit error(text);
 }
 
+void ApiLayer0::writeQueue()
+{
+    while(!p->queue.isEmpty())
+        write(p->queue.takeFirst());
+}
+
 void ApiLayer0::write(QByteArray data)
 {
-    p->socket->write(data.replace("\n", "\r") + "\n");
-    p->socket->flush();
+    if(p->socket->state() == QAbstractSocket::ConnectedState)
+    {
+        p->socket->write(data.replace("\n", "\r\t\t\r") + "\n");
+        p->socket->flush();
+    }
+    else
+    {
+        p->queue.append(data);
+    }
 }
 
 QByteArray ApiLayer0::read(qint64 maxlen)
 {
     QByteArray data = p->socket->readLine(maxlen);
     data.replace("\n", "");
-    data.replace("\r", "\n");
+    data.replace("\r\t\t\r", "\n");
 
     return data;
 }

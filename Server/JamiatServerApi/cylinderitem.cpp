@@ -38,7 +38,7 @@ void CylinderItem::handleSocket(qintptr handle)
     p->sockets[handle] = socket;
     p->mutex.unlock();
 
-    connect(socket, SIGNAL(disconnected()), SLOT(disconnected()));
+    connect(socket, SIGNAL(disconnected()), SLOT(disconnected()), Qt::QueuedConnection);
     socket->start();
 }
 

@@ -24,10 +24,10 @@ public slots:
 
 signals:
     void disconnected();
-    void blockThisShit(const QHostAddress &host);
 
 private slots:
     void readyRead();
+    void blockThisShit(const QHostAddress &host);
 
 private:
     QByteArray callServiceApi0(qint64 id, const QByteArray &data);

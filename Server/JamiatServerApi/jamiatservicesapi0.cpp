@@ -70,8 +70,7 @@ QByteArray JamiatServicesApi0::updateService(QByteArray data)
                   "LEFT JOIN image "
                   "ON post.id = image.post_id "
                   "WHERE post.date < :fromdate AND post.date > :todate "
-//                  "AND post.type=:type "
-                  "GROUP BY image.post_id "
+                  "GROUP BY guid "
                   "ORDER BY post.date DESC "
                   "LIMIT :limit "
                   "OFFSET :offset");
@@ -80,8 +79,8 @@ QByteArray JamiatServicesApi0::updateService(QByteArray data)
     query.bindValue(":todate", QDateTime(QDate(1,1,1), QTime(0,0)) );
     query.bindValue(":limit", limit);
     query.bindValue(":offset", offset);
-    query.bindValue(":type", static_cast<int>(NormalPost));
-    query.exec();
+    if(!query.exec())
+        qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
     QList<JamiatServicesApi0_UpdateUnitStruct> list;
     while(query.next())
@@ -151,7 +150,8 @@ QByteArray JamiatServicesApi0::fullPostService(QByteArray data)
                   "ORDER BY post.date DESC ");
 
     query.bindValue(":guid", postGuid );
-    query.exec();
+    if(!query.exec())
+        qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
     JamiatServicesApi0_UpdateUnitStruct unit;
     if(!query.next())
@@ -223,7 +223,8 @@ QByteArray JamiatServicesApi0::searchService(QByteArray data)
     query.bindValue(":keyword", "%" + keyword + "%" );
     query.bindValue(":limit", limit);
     query.bindValue(":offset", offset);
-    query.exec();
+    if(!query.exec())
+        qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
     QList<JamiatServicesApi0_UpdateUnitStruct> list;
     while(query.next())
@@ -305,7 +306,8 @@ QByteArray JamiatServicesApi0::lastEventsService(QByteArray data)
     query.bindValue(":limit", limit);
     query.bindValue(":offset", offset);
     query.bindValue(":eventId", eventId);
-    query.exec();
+    if(!query.exec())
+        qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
     QList<JamiatServicesApi0_UpdateUnitStruct> list;
     while(query.next())
@@ -391,7 +393,8 @@ QByteArray JamiatServicesApi0::fetchEventsService(QByteArray data)
     query.bindValue(":limit", limit);
     query.bindValue(":offset", offset);
     query.bindValue(":type", static_cast<int>(EventPost));
-    query.exec();
+    if(!query.exec())
+        qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
     QList<JamiatServicesApi0_UpdateUnitStruct> list;
     while(query.next())

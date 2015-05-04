@@ -85,6 +85,7 @@ private slots:
     void onFetchEventsRequestAnswer(QByteArray data);
 
     void error_prv(QAbstractSocket::SocketError socketError);
+    void writeQueue();
 
 private:
     void write(QByteArray data);
