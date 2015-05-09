@@ -39,6 +39,7 @@ Rectangle {
 
     MainPageModel{
         id: main_model
+        onError: error_frame.show(text)
         Component.onCompleted: showEvents()
     }
 
@@ -159,6 +160,10 @@ Rectangle {
         Behavior on y {
             NumberAnimation{ easing.type: Easing.OutCubic; duration: 400 }
         }
+    }
+
+    ErrorFrame {
+        id: error_frame
     }
 
     Component {

@@ -25,6 +25,7 @@ Image {
     }
 
     Indicator {
+        id: indicator
         anchors.fill: parent
         light: false
         modern: true
@@ -32,10 +33,17 @@ Image {
 
         property bool active: downloader_item.result.length == 0
         onActiveChanged: {
+            active_indict_timer.stop()
             if(active)
-                start()
+                active_indict_timer.start()
             else
                 stop()
+        }
+
+        Timer {
+            id: active_indict_timer
+            interval: 200
+            onTriggered: indicator.start()
         }
     }
 

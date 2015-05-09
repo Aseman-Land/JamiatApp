@@ -50,7 +50,7 @@ Rectangle {
             model.append( {"txt":qsTr("OpenSource Licenses"), "cmd": "opensource-apps"} )
             model.append( {"txt":qsTr("About Jamiat"), "cmd": "about-jamiat"} )
             model.append( {"txt":qsTr("About Application"), "cmd": "about-app"} )
-            model.append( {"txt":qsTr("About NileGroup"), "cmd": "about-nile"} )
+//            model.append( {"txt":qsTr("About NileGroup"), "cmd": "about-nile"} )
         }
     }
 

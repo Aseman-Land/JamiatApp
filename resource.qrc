@@ -25,5 +25,7 @@
         <file>qml/JamiatApp/AboutJamiat.qml</file>
         <file>qml/JamiatApp/OpenSourceProjects.qml</file>
         <file>qml/JamiatApp/files/cover2.jpg</file>
+        <file>qml/JamiatApp/JamiatAutoImage.qml</file>
+        <file>qml/JamiatApp/ErrorFrame.qml</file>
     </qresource>
 </RCC>

@@ -10,6 +10,7 @@ Item {
     property variant images: new Array
     property color color
     property bool viewMode: false
+    property real thumbnailBarHeight: 48*Devices.density
 
     onImagesChanged: {
         listv.model.clear()
@@ -51,8 +52,6 @@ Item {
         delegate: JamiatImage {
             width: listv.width
             height: listv.height
-            sourceSize: Qt.size(width, height )
-            asynchronous: true
             imageName: model.imageName
             colorAnalizer: index == 0
             onColorChanged: if(index == 0) jamiat_images.color = color
@@ -64,7 +63,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        height: visible? 48*Devices.density : 0
+        height: visible? thumbnailBarHeight : 0
         orientation: Qt.Horizontal
         model: ListModel {}
         snapMode: ListView.SnapOneItem
