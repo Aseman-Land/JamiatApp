@@ -4,6 +4,7 @@ import AsemanTools 1.0
 Row {
     id: title_row
     layoutDirection: View.layoutDirection
+    height: Devices.standardTitleBarHeight
 
     property alias title: txt.text
     property alias date: date_txt.text
@@ -14,15 +15,15 @@ Row {
     Column {
         id: title_column
         width: share_btn.visible? title_row.width - share_btn.width : title_row.width
+        anchors.verticalCenter: parent.verticalCenter
         spacing: -4*Devices.density
 
         Text {
             id: txt
             anchors.left: parent.left
             anchors.right: parent.right
-            font.family: AsemanApp.globalFont.family
             font.pixelSize: 11*Devices.fontDensity
-            font.weight: Font.DemiBold
+            font.family: "Droid Arabic Naskh"
             color: "#222222"
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             maximumLineCount: 1
@@ -34,7 +35,7 @@ Row {
             id: date_txt
             anchors.left: parent.left
             anchors.right: parent.right
-            font.family: AsemanApp.globalFont.family
+            font.family: "Droid Arabic Naskh"
             font.pixelSize: 8*Devices.fontDensity
             color: "#666666"
             horizontalAlignment: title_row.layoutDirection==Qt.RightToLeft? Text.AlignRight : Text.AlignLeft

@@ -25,6 +25,11 @@ AsemanMain {
         onStatusChanged: if(status == FontLoader.Ready) AsemanApp.globalFont.family = name
     }
 
+    FontLoader{
+        id: papyrus_yekan_font
+        source: Devices.resourcePath + "/fonts/BYekan.ttf"
+    }
+
     Connections {
         target: Jamiat
         onBackRequest: AsemanApp.back()
@@ -98,8 +103,9 @@ AsemanMain {
         SideMenu {
             id: sidebar
             anchors.fill: parent
+            anchors.bottomMargin: View.navigationBarHeight
             menuWidth: {
-                var result = parent.width/2 + 30*Devices.density
+                var result = parent.width/2 + 50*Devices.density
                 if(result < 200*Devices.density)
                     result = parent.width-80*Devices.density
 
@@ -119,7 +125,7 @@ AsemanMain {
 
                 SideMenuList {
                     anchors.top: menu_cover.bottom
-                    anchors.bottom: parent.bottom
+                    anchors.bottom: menu_cover_btm.top
                     width: parent.width
                     color: "#f0f0f0"
                     onItemClicked: {
@@ -134,6 +140,11 @@ AsemanMain {
                         case "events":
                             sidebar.discard()
                             component = events_list_component
+                            break
+
+                        case "reports":
+                            sidebar.discard()
+                            component = reports_list_component
                             break
 
                         case "about-nile":
@@ -167,6 +178,15 @@ AsemanMain {
                         interval: 400
                         onTriggered: sidebar.discard()
                     }
+                }
+
+                Image {
+                    id: menu_cover_btm
+                    width: parent.width
+                    height: width/6
+                    anchors.bottom: parent.bottom
+                    source: "files/cover3.jpg"
+                    sourceSize: Qt.size(width,height)
                 }
             }
         }
@@ -230,6 +250,13 @@ AsemanMain {
     Component {
         id: events_list_component
         EventsList {
+            anchors.fill: parent
+        }
+    }
+
+    Component {
+        id: reports_list_component
+        ReportsList {
             anchors.fill: parent
         }
     }

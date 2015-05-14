@@ -173,6 +173,13 @@ QString JamiatApp::textToHtml(const QString &text)
     return res;
 }
 
+QString JamiatApp::fixText(const QString &text)
+{
+    QString res = text;
+    res.replace(QRegExp("\\=\\=\\=+"), "\n=========== \n");
+    return res;
+}
+
 bool JamiatApp::eventFilter(QObject *o, QEvent *e)
 {
     if( o == p->viewer )

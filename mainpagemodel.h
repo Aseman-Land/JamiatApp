@@ -22,14 +22,15 @@
 #include "asemantools/asemanabstractcolorfulllistmodel.h"
 #include <QColor>
 
-class ApiLayer0_ItemStruct;
-typedef ApiLayer0_ItemStruct ApiLayerItemStruct;
+class ApiLayer_ItemStruct;
+typedef ApiLayer_ItemStruct ApiLayerItemStruct;
 class MainPageModel : public AsemanAbstractColorfullListModel
 {
     Q_OBJECT
     Q_PROPERTY(int count READ count NOTIFY countChanged)
     Q_PROPERTY(QString keyword READ keyword WRITE setKeyword NOTIFY keywordChanged)
     Q_PROPERTY(QString eventId READ eventId WRITE setEventId NOTIFY eventIdChanged)
+    Q_PROPERTY(bool reportMode READ reportMode WRITE setReportMode NOTIFY reportModeChanged)
     Q_PROPERTY(bool refreshing READ refreshing NOTIFY refreshingChanged)
 
 public:
@@ -60,6 +61,9 @@ public:
     void setEventId(const QString &eventId);
     QString eventId() const;
 
+    void setReportMode(bool stt);
+    bool reportMode() const;
+
     int count() const;
     bool refreshing() const;
 
@@ -71,26 +75,29 @@ public slots:
 
     void loadMore();
     void readHistory();
+    void readReports();
 
 signals:
     void countChanged();
     void refreshingChanged();
     void keywordChanged();
     void eventIdChanged();
+    void reportModeChanged();
     void error(const QString &text);
 
 private slots:
-    void updateRequestAnswer(qint64 id, const QList<ApiLayer0_ItemStruct> &items);
-    void searchRequestAnswer(qint64 id, const QList<ApiLayer0_ItemStruct> &items);
-    void lastEventsRequestAnswer(qint64 id, const QList<ApiLayer0_ItemStruct> &items);
-    void fetchEventsRequestAnswer(qint64 id, const QList<ApiLayer0_ItemStruct> &items);
+    void updateRequestAnswer(qint64 id, const QList<ApiLayer_ItemStruct> &items);
+    void searchRequestAnswer(qint64 id, const QList<ApiLayer_ItemStruct> &items);
+    void lastEventsRequestAnswer(qint64 id, const QList<ApiLayer_ItemStruct> &items);
+    void fetchEventsRequestAnswer(qint64 id, const QList<ApiLayer_ItemStruct> &items);
+    void fetchReportsRequestAnswer(qint64 id, const QList<ApiLayer_ItemStruct> &items);
 
     void clearGarbages();
     void error_prv(const QString &text);
 
 private:
     void refresh_prv(QList<ApiLayerItemStruct> items);
-    QList<ApiLayer0_ItemStruct> makeUnique(QList<ApiLayer0_ItemStruct> items);
+    QList<ApiLayer_ItemStruct> makeUnique(QList<ApiLayer_ItemStruct> items);
     void insertGarbage(QObject *obj);
 
 private:

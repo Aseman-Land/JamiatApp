@@ -1,4 +1,4 @@
-#include "jamiatservicesapi0.h"
+#include "jamiatservicesapi1.h"
 
 #include <QDataStream>
 #include <QDateTime>
@@ -10,7 +10,7 @@
 #include <QVariant>
 #include <QDebug>
 
-class JamiatServicesApi0_UpdateUnitStruct
+class JamiatServicesApi1_UpdateUnitStruct
 {
 public:
     QString guid;
@@ -31,14 +31,14 @@ public:
     QSqlDatabase db;
 };
 
-JamiatServicesApi0::JamiatServicesApi0(const QString &connection, QObject *parent) :
+JamiatServicesApi1::JamiatServicesApi1(const QString &connection, QObject *parent) :
     QObject(parent)
 {
     p = new JamiatServicesApi0Private;
     p->db = QSqlDatabase::database(connection);
 }
 
-QByteArray JamiatServicesApi0::updateService(QByteArray data)
+QByteArray JamiatServicesApi1::updateService(QByteArray data)
 {
     QByteArray result;
     QDataStream ostream(&result, QIODevice::WriteOnly);
@@ -82,11 +82,11 @@ QByteArray JamiatServicesApi0::updateService(QByteArray data)
     if(!query.exec())
         qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
-    QList<JamiatServicesApi0_UpdateUnitStruct> list;
+    QList<JamiatServicesApi1_UpdateUnitStruct> list;
     while(query.next())
     {
         QSqlRecord record = query.record();
-        JamiatServicesApi0_UpdateUnitStruct unit;
+        JamiatServicesApi1_UpdateUnitStruct unit;
         unit.guid = record.value("guid").toString();
         unit.link = record.value("link").toString();
         unit.title = record.value("title").toString();
@@ -96,7 +96,7 @@ QByteArray JamiatServicesApi0::updateService(QByteArray data)
         unit.eventId = record.value("eventId").toString();
         unit.pictures = record.value("GROUP_CONCAT(picture, ',')").toString().split(",", QString::SkipEmptyParts);
         unit.thumbnails = record.value("GROUP_CONCAT(thumbnail, ',')").toString().split(",", QString::SkipEmptyParts);
-        unit.type = record.value("type").toInt()==EventPost? EventPost : NormalPost;
+        unit.type = record.value("type").toInt();
 
         list << unit;
     }
@@ -104,7 +104,7 @@ QByteArray JamiatServicesApi0::updateService(QByteArray data)
     ostream << static_cast<int>(UpdateStruct);
     ostream << attachId;
     ostream << list.count();
-    foreach(const JamiatServicesApi0_UpdateUnitStruct &unit, list)
+    foreach(const JamiatServicesApi1_UpdateUnitStruct &unit, list)
     {
         ostream << unit.guid;
         ostream << unit.link;
@@ -121,7 +121,7 @@ QByteArray JamiatServicesApi0::updateService(QByteArray data)
     return result;
 }
 
-QByteArray JamiatServicesApi0::fullPostService(QByteArray data)
+QByteArray JamiatServicesApi1::fullPostService(QByteArray data)
 {
     QByteArray result;
     QDataStream ostream(&result, QIODevice::WriteOnly);
@@ -153,7 +153,7 @@ QByteArray JamiatServicesApi0::fullPostService(QByteArray data)
     if(!query.exec())
         qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
-    JamiatServicesApi0_UpdateUnitStruct unit;
+    JamiatServicesApi1_UpdateUnitStruct unit;
     if(!query.next())
         return result;
 
@@ -166,7 +166,7 @@ QByteArray JamiatServicesApi0::fullPostService(QByteArray data)
     unit.publisher = record.value("publisher").toString();
     unit.pictures = record.value("GROUP_CONCAT(picture, ',')").toString().split(",", QString::SkipEmptyParts);
     unit.thumbnails = record.value("GROUP_CONCAT(thumbnail, ',')").toString().split(",", QString::SkipEmptyParts);
-    unit.type = record.value("type").toInt()==EventPost? EventPost : NormalPost;
+    unit.type = record.value("type").toInt();
     unit.eventId = record.value("eventId").toString();
 
     ostream << static_cast<int>(FullPostStruct);
@@ -185,7 +185,7 @@ QByteArray JamiatServicesApi0::fullPostService(QByteArray data)
     return result;
 }
 
-QByteArray JamiatServicesApi0::searchService(QByteArray data)
+QByteArray JamiatServicesApi1::searchService(QByteArray data)
 {
     QByteArray result;
     QDataStream ostream(&result, QIODevice::WriteOnly);
@@ -226,11 +226,11 @@ QByteArray JamiatServicesApi0::searchService(QByteArray data)
     if(!query.exec())
         qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
-    QList<JamiatServicesApi0_UpdateUnitStruct> list;
+    QList<JamiatServicesApi1_UpdateUnitStruct> list;
     while(query.next())
     {
         QSqlRecord record = query.record();
-        JamiatServicesApi0_UpdateUnitStruct unit;
+        JamiatServicesApi1_UpdateUnitStruct unit;
         unit.guid = record.value("guid").toString();
         unit.link = record.value("link").toString();
         unit.title = record.value("title").toString();
@@ -239,7 +239,7 @@ QByteArray JamiatServicesApi0::searchService(QByteArray data)
         unit.publisher = record.value("publisher").toString();
         unit.pictures = record.value("GROUP_CONCAT(picture, ',')").toString().split(",", QString::SkipEmptyParts);
         unit.thumbnails = record.value("GROUP_CONCAT(thumbnail, ',')").toString().split(",", QString::SkipEmptyParts);
-        unit.type = record.value("type").toInt()==EventPost? EventPost : NormalPost;
+        unit.type = record.value("type").toInt();
         unit.eventId = record.value("eventId").toString();
 
         list << unit;
@@ -248,7 +248,7 @@ QByteArray JamiatServicesApi0::searchService(QByteArray data)
     ostream << static_cast<int>(SearchStruct);
     ostream << attachId;
     ostream << list.count();
-    foreach(const JamiatServicesApi0_UpdateUnitStruct &unit, list)
+    foreach(const JamiatServicesApi1_UpdateUnitStruct &unit, list)
     {
         ostream << unit.guid;
         ostream << unit.link;
@@ -265,7 +265,7 @@ QByteArray JamiatServicesApi0::searchService(QByteArray data)
     return result;
 }
 
-QByteArray JamiatServicesApi0::lastEventsService(QByteArray data)
+QByteArray JamiatServicesApi1::lastEventsService(QByteArray data)
 {
     QByteArray result;
     QDataStream ostream(&result, QIODevice::WriteOnly);
@@ -309,11 +309,11 @@ QByteArray JamiatServicesApi0::lastEventsService(QByteArray data)
     if(!query.exec())
         qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
-    QList<JamiatServicesApi0_UpdateUnitStruct> list;
+    QList<JamiatServicesApi1_UpdateUnitStruct> list;
     while(query.next())
     {
         QSqlRecord record = query.record();
-        JamiatServicesApi0_UpdateUnitStruct unit;
+        JamiatServicesApi1_UpdateUnitStruct unit;
         unit.guid = record.value("guid").toString();
         unit.link = record.value("link").toString();
         unit.title = record.value("title").toString();
@@ -322,7 +322,7 @@ QByteArray JamiatServicesApi0::lastEventsService(QByteArray data)
         unit.publisher = record.value("publisher").toString();
         unit.pictures = record.value("GROUP_CONCAT(picture, ',')").toString().split(",", QString::SkipEmptyParts);
         unit.thumbnails = record.value("GROUP_CONCAT(thumbnail, ',')").toString().split(",", QString::SkipEmptyParts);
-        unit.type = record.value("type").toInt()==EventPost? EventPost : NormalPost;
+        unit.type = record.value("type").toInt();
         unit.eventId = record.value("eventId").toString();
 
         list << unit;
@@ -331,7 +331,7 @@ QByteArray JamiatServicesApi0::lastEventsService(QByteArray data)
     ostream << static_cast<int>(LastEventsStruct);
     ostream << attachId;
     ostream << list.count();
-    foreach(const JamiatServicesApi0_UpdateUnitStruct &unit, list)
+    foreach(const JamiatServicesApi1_UpdateUnitStruct &unit, list)
     {
         ostream << unit.guid;
         ostream << unit.link;
@@ -348,7 +348,7 @@ QByteArray JamiatServicesApi0::lastEventsService(QByteArray data)
     return result;
 }
 
-QByteArray JamiatServicesApi0::fetchEventsService(QByteArray data)
+QByteArray JamiatServicesApi1::fetchEventsService(QByteArray data)
 {
     QByteArray result;
     QDataStream ostream(&result, QIODevice::WriteOnly);
@@ -396,11 +396,11 @@ QByteArray JamiatServicesApi0::fetchEventsService(QByteArray data)
     if(!query.exec())
         qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
 
-    QList<JamiatServicesApi0_UpdateUnitStruct> list;
+    QList<JamiatServicesApi1_UpdateUnitStruct> list;
     while(query.next())
     {
         QSqlRecord record = query.record();
-        JamiatServicesApi0_UpdateUnitStruct unit;
+        JamiatServicesApi1_UpdateUnitStruct unit;
         unit.guid = record.value("guid").toString();
         unit.link = record.value("link").toString();
         unit.title = record.value("title").toString();
@@ -410,7 +410,7 @@ QByteArray JamiatServicesApi0::fetchEventsService(QByteArray data)
         unit.eventId = record.value("eventId").toString();
         unit.pictures = record.value("GROUP_CONCAT(picture, ',')").toString().split(",", QString::SkipEmptyParts);
         unit.thumbnails = record.value("GROUP_CONCAT(thumbnail, ',')").toString().split(",", QString::SkipEmptyParts);
-        unit.type = record.value("type").toInt()==EventPost? EventPost : NormalPost;
+        unit.type = record.value("type").toInt();
 
         list << unit;
     }
@@ -418,7 +418,7 @@ QByteArray JamiatServicesApi0::fetchEventsService(QByteArray data)
     ostream << static_cast<int>(FetchEventsStruct);
     ostream << attachId;
     ostream << list.count();
-    foreach(const JamiatServicesApi0_UpdateUnitStruct &unit, list)
+    foreach(const JamiatServicesApi1_UpdateUnitStruct &unit, list)
     {
         ostream << unit.guid;
         ostream << unit.link;
@@ -435,7 +435,85 @@ QByteArray JamiatServicesApi0::fetchEventsService(QByteArray data)
     return result;
 }
 
-JamiatServicesApi0::~JamiatServicesApi0()
+QByteArray JamiatServicesApi1::fetchReportsService(QByteArray data)
+{
+    QByteArray result;
+    QDataStream ostream(&result, QIODevice::WriteOnly);
+    QDataStream istream(&data, QIODevice::ReadOnly);
+
+    int structId = 0;
+    int limit = 0;
+    int offset = 0;
+    qint64 attachId = 0;
+
+    istream >> structId;
+    istream >> offset;
+    istream >> limit;
+    istream >> attachId;
+
+    if(structId != FetchReportsRequestStruct)
+        return result;
+
+    if(limit <= 0 || limit > 20)
+        limit = 20;
+
+    QSqlQuery query(p->db);
+    query.prepare("SELECT guid, link, title, description, date, publisher, GROUP_CONCAT(picture, ','), GROUP_CONCAT(thumbnail, ','), type, eventId "
+                  "FROM post "
+                  "LEFT JOIN image "
+                  "ON post.id = image.post_id "
+                  "WHERE post.type=:type "
+                  "GROUP BY image.post_id "
+                  "ORDER BY post.date DESC "
+                  "LIMIT :limit "
+                  "OFFSET :offset ");
+
+    query.bindValue(":type", static_cast<int>(ReportPost) );
+    query.bindValue(":limit", limit);
+    query.bindValue(":offset", offset);
+    if(!query.exec())
+        qDebug() << __PRETTY_FUNCTION__ << QDateTime::currentDateTime() << query.lastError().text();
+
+    QList<JamiatServicesApi1_UpdateUnitStruct> list;
+    while(query.next())
+    {
+        QSqlRecord record = query.record();
+        JamiatServicesApi1_UpdateUnitStruct unit;
+        unit.guid = record.value("guid").toString();
+        unit.link = record.value("link").toString();
+        unit.title = record.value("title").toString();
+        unit.description = record.value("description").toString();
+        unit.date = record.value("date").toDateTime();
+        unit.publisher = record.value("publisher").toString();
+        unit.pictures = record.value("GROUP_CONCAT(picture, ',')").toString().split(",", QString::SkipEmptyParts);
+        unit.thumbnails = record.value("GROUP_CONCAT(thumbnail, ',')").toString().split(",", QString::SkipEmptyParts);
+        unit.type = record.value("type").toInt();
+        unit.eventId = record.value("eventId").toString();
+
+        list << unit;
+    }
+
+    ostream << static_cast<int>(FetchReportsStruct);
+    ostream << attachId;
+    ostream << list.count();
+    foreach(const JamiatServicesApi1_UpdateUnitStruct &unit, list)
+    {
+        ostream << unit.guid;
+        ostream << unit.link;
+        ostream << unit.title;
+        ostream << unit.description;
+        ostream << unit.date;
+        ostream << unit.publisher;
+        ostream << unit.pictures;
+        ostream << unit.thumbnails;
+        ostream << unit.eventId;
+        ostream << unit.type;
+    }
+
+    return result;
+}
+
+JamiatServicesApi1::~JamiatServicesApi1()
 {
     delete p;
 }

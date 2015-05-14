@@ -315,6 +315,37 @@ Nile create Free and OpenSource projects.</source>
     </message>
 </context>
 <context>
+    <name>JamiatNewRefreshing</name>
+    <message>
+        <source>Drag to Refresh</source>
+        <translation>به روز رسانی</translation>
+    </message>
+    <message>
+        <source>Stop It :|</source>
+        <translation>بسه دیگه :|</translation>
+    </message>
+    <message>
+        <source>Drop Me :((</source>
+        <translation>ولم کن :((</translation>
+    </message>
+    <message>
+        <source>:((</source>
+        <translation>)):</translation>
+    </message>
+    <message>
+        <source>Outch!! :(</source>
+        <translation>آآی!! :(</translation>
+    </message>
+    <message>
+        <source>Now drop :)</source>
+        <translation>حالا رها کن :)</translation>
+    </message>
+    <message>
+        <source>:|</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>JamiatRefreshing</name>
     <message>
         <source>Refreshing</source>
@@ -334,6 +365,10 @@ Nile create Free and OpenSource projects.</source>
     <message>
         <source>Event</source>
         <translation>طرح</translation>
+    </message>
+    <message>
+        <source>Reports</source>
+        <translation>گزارش‌ها</translation>
     </message>
 </context>
 <context>
@@ -355,7 +390,7 @@ Nile create Free and OpenSource projects.</source>
     <name>OpenSourceProjects</name>
     <message>
         <source>List of other opensource projects used in this app.</source>
-        <translation type="unfinished"></translation>
+        <translation>لیست پروژه‌های منبع‌بازی که در این برنامه از آن‌ها استفاده شده.</translation>
     </message>
     <message>
         <source>Open Source Licenses</source>
@@ -374,6 +409,13 @@ Nile create Free and OpenSource projects.</source>
     <message>
         <source>Go To Resource</source>
         <translation>منبع اصلی متن</translation>
+    </message>
+</context>
+<context>
+    <name>ReportsList</name>
+    <message>
+        <source>Reports</source>
+        <translation>گزارش‌ها</translation>
     </message>
 </context>
 <context>
@@ -424,6 +466,10 @@ Nile create Free and OpenSource projects.</source>
     <message>
         <source>OpenSource Licenses</source>
         <translation>مجوزهای متن باز</translation>
+    </message>
+    <message>
+        <source>Reports</source>
+        <translation>گزارش‌ها</translation>
     </message>
 </context>
 <context>

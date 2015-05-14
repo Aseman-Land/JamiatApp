@@ -31,6 +31,8 @@ private slots:
 
 private:
     QByteArray callServiceApi0(qint64 id, const QByteArray &data);
+    QByteArray callServiceApi1(qint64 id, const QByteArray &data);
+
     void init_db();
     void init_apis();
 

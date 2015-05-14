@@ -223,7 +223,15 @@ FacebookRssReaderItem *FacebookRssDownloader::parseItemElement(const QDomElement
     result->setAuthor(author);
     result->setCreator(creator);
     result->setEventId( extractEventId(description) );
-    result->setType( result->eventId().isEmpty()? FacebookRssReaderItem::NormalPost : FacebookRssReaderItem::EventPost );
+    result->setReportId( extractReportId(description) );
+
+    if(!result->reportId().isEmpty())
+        result->setType(FacebookRssReaderItem::ReportPost);
+    else
+    if(!result->eventId().isEmpty())
+        result->setType(FacebookRssReaderItem::EventPost);
+    else
+        result->setType(FacebookRssReaderItem::NormalPost);
 
     p->imageDownloader->downloadImages(result);
 
@@ -264,8 +272,20 @@ void FacebookRssDownloader::destroyDownloader()
 QString FacebookRssDownloader::extractEventId(const QString &text)
 {
     QRegExp rx("facebook\\.com\\/events\\/(\\d+)");
-    int pos = 0;
 
+    int pos = 0;
+    if((pos = rx.indexIn(text, pos)) == -1)
+        return QString();
+    else
+        return rx.cap(1);
+}
+
+QString FacebookRssDownloader::extractReportId(const QString &text)
+{
+    QRegExp rx("(http\\:\\/\\/.*sosapoverty\\.org.*\\/Reports\\/.*\\.pdf)");
+    rx.setMinimal(true);
+
+    int pos = 0;
     if((pos = rx.indexIn(text, pos)) == -1)
         return QString();
     else

@@ -13,7 +13,8 @@ SOURCES += \
     cylindermanager.cpp \
     cylinderitem.cpp \
     jamiatserversocket.cpp \
-    jamiatservicesapi0.cpp
+    jamiatservicesapi0.cpp \
+    jamiatservicesapi1.cpp
 
 HEADERS += \
     jamiatserver.h \
@@ -21,4 +22,5 @@ HEADERS += \
     cylindermanager.h \
     cylinderitem.h \
     jamiatserversocket.h \
-    jamiatservicesapi0.h
+    jamiatservicesapi0.h \
+    jamiatservicesapi1.h

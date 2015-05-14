@@ -44,6 +44,7 @@ public:
     QString language() const;
 
     Q_INVOKABLE QString textToHtml(const QString &text);
+    Q_INVOKABLE QString fixText(const QString &text);
 
 public slots:
     void start();

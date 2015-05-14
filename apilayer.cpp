@@ -1,4 +1,4 @@
-#include "apilayer0.h"
+#include "apilayer.h"
 
 #include <QTcpSocket>
 #include <QDataStream>
@@ -6,7 +6,7 @@
 #include <QTimerEvent>
 #include <QQueue>
 
-class ApiLayer0Private
+class ApiLayerPrivate
 {
 public:
     qint64 id_counter;
@@ -16,15 +16,15 @@ public:
     QQueue<QByteArray> queue;
 };
 
-ApiLayer0::ApiLayer0(QObject *parent) :
+ApiLayer::ApiLayer(QObject *parent) :
     QObject(parent)
 {
-    p = new ApiLayer0Private;
+    p = new ApiLayerPrivate;
     p->id_counter = 10000;
     initSocket();
 }
 
-void ApiLayer0::initSocket()
+void ApiLayer::initSocket()
 {
     if(p->socket)
         delete p->socket;
@@ -41,7 +41,7 @@ void ApiLayer0::initSocket()
     connect(p->socket, SIGNAL(connected()), SLOT(writeQueue())  );
 }
 
-qint64 ApiLayer0::updateRequest(int offset, int limit)
+qint64 ApiLayer::updateRequest(int offset, int limit)
 {
     QDateTime fromTime = QDateTime::currentDateTime();
     fromTime = fromTime.addDays(1);
@@ -68,7 +68,7 @@ qint64 ApiLayer0::updateRequest(int offset, int limit)
     return p->id_counter;
 }
 
-qint64 ApiLayer0::fullPostRequest(const QString &guid)
+qint64 ApiLayer::fullPostRequest(const QString &guid)
 {
     p->id_counter++;
 
@@ -90,7 +90,7 @@ qint64 ApiLayer0::fullPostRequest(const QString &guid)
     return p->id_counter;
 }
 
-qint64 ApiLayer0::searchRequest(const QString &keyword, int offset, int limit)
+qint64 ApiLayer::searchRequest(const QString &keyword, int offset, int limit)
 {
     p->id_counter++;
 
@@ -114,7 +114,7 @@ qint64 ApiLayer0::searchRequest(const QString &keyword, int offset, int limit)
     return p->id_counter;
 }
 
-qint64 ApiLayer0::lastEventsRequest(const QString &eventId, int offset, int limit)
+qint64 ApiLayer::lastEventsRequest(const QString &eventId, int offset, int limit)
 {
     p->id_counter++;
 
@@ -138,7 +138,7 @@ qint64 ApiLayer0::lastEventsRequest(const QString &eventId, int offset, int limi
     return p->id_counter;
 }
 
-qint64 ApiLayer0::fetchEventsRequest(int offset, int limit)
+qint64 ApiLayer::fetchEventsRequest(int offset, int limit)
 {
     QDateTime fromTime = QDateTime::currentDateTime();
     fromTime = fromTime.addDays(1);
@@ -165,7 +165,30 @@ qint64 ApiLayer0::fetchEventsRequest(int offset, int limit)
     return p->id_counter;
 }
 
-void ApiLayer0::onReadyRead()
+qint64 ApiLayer::fetchReportsRequest(int offset, int limit)
+{
+    p->id_counter++;
+
+    QByteArray structData;
+    QDataStream structStream(&structData, QIODevice::WriteOnly);
+    structStream << static_cast<int>(FetchReportsRequestStruct);
+    structStream << offset;
+    structStream << limit;
+    structStream << p->id_counter;
+
+    QByteArray topData;
+    QDataStream topStream(&topData, QIODevice::WriteOnly);
+    topStream << static_cast<int>(ApiId);
+    topStream << static_cast<int>(FetchReportsService);
+    topStream << structData;
+
+    write(topData);
+
+    startTimeOut(p->id_counter);
+    return p->id_counter;
+}
+
+void ApiLayer::onReadyRead()
 {
     while(p->socket->canReadLine())
     {
@@ -201,13 +224,17 @@ void ApiLayer0::onReadyRead()
         case FetchEventsService:
             onFetchEventsRequestAnswer(serviceData);
             break;
+
+        case FetchReportsService:
+            onFetchReportsRequestAnswer(serviceData);
+            break;
         }
     }
 }
 
-void ApiLayer0::onUpdateRequestAnswer(QByteArray data)
+void ApiLayer::onUpdateRequestAnswer(QByteArray data)
 {
-    QList<ApiLayer0_ItemStruct> result;
+    QList<ApiLayer_ItemStruct> result;
     int structId = 0;
     qint64 id = 0;
     int count = 0;
@@ -230,7 +257,7 @@ void ApiLayer0::onUpdateRequestAnswer(QByteArray data)
         if(stream.atEnd())
             return;
 
-        ApiLayer0_ItemStruct unit;
+        ApiLayer_ItemStruct unit;
         stream >> unit.guid;
         stream >> unit.link;
         stream >> unit.title;
@@ -251,9 +278,9 @@ void ApiLayer0::onUpdateRequestAnswer(QByteArray data)
     emit updateRequestAnswer(id, result);
 }
 
-void ApiLayer0::onFullPostRequestAnswer(QByteArray data)
+void ApiLayer::onFullPostRequestAnswer(QByteArray data)
 {
-    ApiLayer0_ItemStruct result;
+    ApiLayer_ItemStruct result;
     int structId = 0;
     qint64 id = 0;
 
@@ -282,9 +309,9 @@ void ApiLayer0::onFullPostRequestAnswer(QByteArray data)
     emit fullPostRequestAnswer(id, result);
 }
 
-void ApiLayer0::onSearchRequestAnswer(QByteArray data)
+void ApiLayer::onSearchRequestAnswer(QByteArray data)
 {
-    QList<ApiLayer0_ItemStruct> result;
+    QList<ApiLayer_ItemStruct> result;
     int structId = 0;
     qint64 id = 0;
     int count = 0;
@@ -307,7 +334,7 @@ void ApiLayer0::onSearchRequestAnswer(QByteArray data)
         if(stream.atEnd())
             return;
 
-        ApiLayer0_ItemStruct unit;
+        ApiLayer_ItemStruct unit;
         stream >> unit.guid;
         stream >> unit.link;
         stream >> unit.title;
@@ -325,9 +352,9 @@ void ApiLayer0::onSearchRequestAnswer(QByteArray data)
     emit searchRequestAnswer(id, result);
 }
 
-void ApiLayer0::onLastEventsRequestAnswer(QByteArray data)
+void ApiLayer::onLastEventsRequestAnswer(QByteArray data)
 {
-    QList<ApiLayer0_ItemStruct> result;
+    QList<ApiLayer_ItemStruct> result;
     int structId = 0;
     qint64 id = 0;
     int count = 0;
@@ -350,7 +377,7 @@ void ApiLayer0::onLastEventsRequestAnswer(QByteArray data)
         if(stream.atEnd())
             return;
 
-        ApiLayer0_ItemStruct unit;
+        ApiLayer_ItemStruct unit;
         stream >> unit.guid;
         stream >> unit.link;
         stream >> unit.title;
@@ -368,9 +395,9 @@ void ApiLayer0::onLastEventsRequestAnswer(QByteArray data)
     emit lastEventsRequestAnswer(id, result);
 }
 
-void ApiLayer0::onFetchEventsRequestAnswer(QByteArray data)
+void ApiLayer::onFetchEventsRequestAnswer(QByteArray data)
 {
-    QList<ApiLayer0_ItemStruct> result;
+    QList<ApiLayer_ItemStruct> result;
     int structId = 0;
     qint64 id = 0;
     int count = 0;
@@ -393,7 +420,7 @@ void ApiLayer0::onFetchEventsRequestAnswer(QByteArray data)
         if(stream.atEnd())
             return;
 
-        ApiLayer0_ItemStruct unit;
+        ApiLayer_ItemStruct unit;
         stream >> unit.guid;
         stream >> unit.link;
         stream >> unit.title;
@@ -411,7 +438,50 @@ void ApiLayer0::onFetchEventsRequestAnswer(QByteArray data)
     emit fetchEventsRequestAnswer(id, result);
 }
 
-void ApiLayer0::error_prv(QAbstractSocket::SocketError socketError)
+void ApiLayer::onFetchReportsRequestAnswer(QByteArray data)
+{
+    QList<ApiLayer_ItemStruct> result;
+    int structId = 0;
+    qint64 id = 0;
+    int count = 0;
+
+    QDataStream stream(&data, QIODevice::ReadOnly);
+    stream >> structId;
+    if(structId != FetchReportsStruct)
+        return;
+
+    stream >> id;
+    checkTimeOut(id);
+
+    if(stream.atEnd())
+        return;
+
+    stream >> count;
+
+    for(int i=0; i<count; i++)
+    {
+        if(stream.atEnd())
+            return;
+
+        ApiLayer_ItemStruct unit;
+        stream >> unit.guid;
+        stream >> unit.link;
+        stream >> unit.title;
+        stream >> unit.description;
+        stream >> unit.date;
+        stream >> unit.publisher;
+        stream >> unit.pictures;
+        stream >> unit.thumbnails;
+        stream >> unit.eventId;
+        stream >> unit.type;
+
+        result << unit;
+    }
+
+    emit fetchReportsRequestAnswer(id, result);
+}
+
+void ApiLayer::error_prv(QAbstractSocket::SocketError socketError)
 {
     QString text;
     switch(static_cast<int>(socketError))
@@ -527,13 +597,13 @@ void ApiLayer0::error_prv(QAbstractSocket::SocketError socketError)
     emit error(text);
 }
 
-void ApiLayer0::writeQueue()
+void ApiLayer::writeQueue()
 {
     while(!p->queue.isEmpty())
         write(p->queue.takeFirst());
 }
 
-void ApiLayer0::write(QByteArray data)
+void ApiLayer::write(QByteArray data)
 {
     if(p->socket->state() == QAbstractSocket::ConnectedState)
     {
@@ -546,7 +616,7 @@ void ApiLayer0::write(QByteArray data)
     }
 }
 
-QByteArray ApiLayer0::read(qint64 maxlen)
+QByteArray ApiLayer::read(qint64 maxlen)
 {
     QByteArray data = p->socket->readLine(maxlen);
     data.replace("\n", "");
@@ -555,13 +625,13 @@ QByteArray ApiLayer0::read(qint64 maxlen)
     return data;
 }
 
-void ApiLayer0::startTimeOut(qint64 id)
+void ApiLayer::startTimeOut(qint64 id)
 {
-    const int timerId = startTimer(10000);
+    const int timerId = startTimer(20000);
     p->waitingList.insert(id, timerId);
 }
 
-void ApiLayer0::checkTimeOut(qint64 id)
+void ApiLayer::checkTimeOut(qint64 id)
 {
     if(!p->waitingList.contains(id))
         return;
@@ -571,7 +641,7 @@ void ApiLayer0::checkTimeOut(qint64 id)
     p->waitingList.remove(id);
 }
 
-void ApiLayer0::timerEvent(QTimerEvent *e)
+void ApiLayer::timerEvent(QTimerEvent *e)
 {
     qint64 reqId = p->waitingList.key(e->timerId());
     if(reqId)
@@ -583,7 +653,7 @@ void ApiLayer0::timerEvent(QTimerEvent *e)
     }
 }
 
-ApiLayer0::~ApiLayer0()
+ApiLayer::~ApiLayer()
 {
     delete p;
 }

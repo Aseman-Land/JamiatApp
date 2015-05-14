@@ -1,7 +1,7 @@
 #include "cachedatabase.h"
 #include "asemantools/asemandevices.h"
 #include "asemantools/asemanapplication.h"
-#include "apilayer0.h"
+#include "apilayer.h"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -122,6 +122,40 @@ QList<ApiLayerItemStruct> CacheDatabase::fetchEvents(const QString &eventId, int
     query.bindValue(":eventId", eventId);
     query.bindValue(":limit", limit);
     query.bindValue(":type", ApiLayerItemStruct::EventPost);
+    if(!query.exec())
+        qDebug() << __PRETTY_FUNCTION__ << query.lastError().text();
+
+    while(query.next())
+    {
+        ApiLayerItemStruct item;
+
+        QSqlRecord record = query.record();
+        item.guid = record.value("guid").toString();
+        item.link = record.value("link").toString();
+        item.title = record.value("title").toString();
+        item.description = record.value("description").toString();
+        item.date = record.value("date").toDateTime();
+        item.publisher = record.value("publisher").toString();
+        item.pictures = record.value("pictures").toString().split(", ", QString::SkipEmptyParts);
+        item.thumbnails = record.value("thumbnails").toString().split(", ", QString::SkipEmptyParts);
+        item.type = record.value("type").toInt();
+        item.eventId = record.value("eventId").toString();
+
+        result << item;
+    }
+
+    return result;
+}
+
+QList<ApiLayerItemStruct> CacheDatabase::readReports(int limit) const
+{
+    QList<ApiLayerItemStruct> result;
+
+    QSqlQuery query(p->db);
+    query.prepare("SELECT * FROM post WHERE type=:type "
+                  "ORDER BY date DESC LIMIT :limit");
+    query.bindValue(":limit", limit);
+    query.bindValue(":type", ApiLayerItemStruct::ReportPost);
     if(!query.exec())
         qDebug() << __PRETTY_FUNCTION__ << query.lastError().text();
 

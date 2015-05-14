@@ -1,5 +1,6 @@
 #include "jamiatserversocket.h"
 #include "jamiatservicesapi0.h"
+#include "jamiatservicesapi1.h"
 
 #include <QPointer>
 #include <QCoreApplication>
@@ -26,6 +27,7 @@ public:
 
     QString databaseConnection;
     JamiatServicesApi0 *api0;
+    JamiatServicesApi1 *api1;
 };
 
 JamiatServerSocket::JamiatServerSocket(qintptr handle, const QString &connection, QObject *parent) :
@@ -103,6 +105,7 @@ void JamiatServerSocket::init_db()
 void JamiatServerSocket::init_apis()
 {
     p->api0 = new JamiatServicesApi0(p->databaseConnection, this);
+    p->api1 = new JamiatServicesApi1(p->databaseConnection, this);
 }
 
 void JamiatServerSocket::write(QByteArray data)
@@ -182,6 +185,10 @@ void JamiatServerSocket::readyRead()
         case JamiatServicesApi0::ApiId:
             result = callServiceApi0(serviceId, serviceData);
             break;
+
+        case JamiatServicesApi1::ApiId:
+            result = callServiceApi1(serviceId, serviceData);
+            break;
         }
 
         write(result);
@@ -222,6 +229,46 @@ QByteArray JamiatServerSocket::callServiceApi0(qint64 id, const QByteArray &data
 
     case JamiatServicesApi0::FetchEventsService:
         stream << p->api0->fetchEventsService(data);
+        break;
+
+    default:
+        qDebug() << id << "there is no any handle for this id";
+        break;
+    }
+
+    return result;
+}
+
+QByteArray JamiatServerSocket::callServiceApi1(qint64 id, const QByteArray &data)
+{
+    QByteArray result;
+    QDataStream stream(&result, QIODevice::WriteOnly);
+    stream << id;
+
+    switch(id)
+    {
+    case JamiatServicesApi1::UpdateService:
+        stream << p->api1->updateService(data);
+        break;
+
+    case JamiatServicesApi1::FullPostService:
+        stream << p->api1->fullPostService(data);
+        break;
+
+    case JamiatServicesApi1::SearchService:
+        stream << p->api1->searchService(data);
+        break;
+
+    case JamiatServicesApi1::LastEventsService:
+        stream << p->api1->lastEventsService(data);
+        break;
+
+    case JamiatServicesApi1::FetchEventsService:
+        stream << p->api1->fetchEventsService(data);
+        break;
+
+    case JamiatServicesApi1::FetchReportsService:
+        stream << p->api1->fetchReportsService(data);
         break;
 
     default:

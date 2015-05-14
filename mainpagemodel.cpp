@@ -17,7 +17,7 @@
 */
 
 #include "mainpagemodel.h"
-#include "apilayer0.h"
+#include "apilayer.h"
 #include "mainpagemodelitem.h"
 #include "cachedatabase.h"
 #include "asemantools/asemancalendarconverter.h"
@@ -26,7 +26,7 @@
 #include <QDebug>
 #include <QTimer>
 
-ApiLayer0 *jamiat_api_layer0 = 0;
+ApiLayer *jamiat_api_layer = 0;
 QSet<MainPageModel*> all_main_model_objects;
 
 class MainPageModelPrivate
@@ -35,6 +35,7 @@ public:
     ApiLayerItemStruct lastEvent;
     QList<ApiLayerItemStruct> lastItems;
     QList<ApiLayerItemStruct> lastSearch;
+    QList<ApiLayerItemStruct> lastReports;
 
     QList<MainPageModelItem*> items;
     QString keyword;
@@ -50,6 +51,7 @@ public:
     QSet<QObject*> garbages;
 
     bool loadMoreState;
+    bool reportMode;
 };
 
 MainPageModel::MainPageModel(QObject *parent) :
@@ -57,6 +59,7 @@ MainPageModel::MainPageModel(QObject *parent) :
 {
     p = new MainPageModelPrivate;
     p->loadMoreState = false;
+    p->reportMode = false;
 
     p->refreshTimer = new QTimer(this);
     p->refreshTimer->setInterval(1000);
@@ -69,20 +72,22 @@ MainPageModel::MainPageModel(QObject *parent) :
     p->calendar = new AsemanCalendarConverter(this);
     p->calendar->setCalendar(AsemanCalendarConverterCore::Jalali);
 
-    if(!jamiat_api_layer0)
-        jamiat_api_layer0 = new ApiLayer0();
+    if(!jamiat_api_layer)
+        jamiat_api_layer = new ApiLayer();
 
     p->cache = new CacheDatabase(this);
 
-    connect(jamiat_api_layer0, SIGNAL(lastEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
-            SLOT(lastEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)));
-    connect(jamiat_api_layer0, SIGNAL(searchRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
-            SLOT(searchRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)));
-    connect(jamiat_api_layer0, SIGNAL(updateRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
-            SLOT(updateRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)));
-    connect(jamiat_api_layer0, SIGNAL(fetchEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)),
-            SLOT(fetchEventsRequestAnswer(qint64,QList<ApiLayer0_ItemStruct>)));
-    connect(jamiat_api_layer0, SIGNAL(error(QString)), SLOT(error_prv(QString)));
+    connect(jamiat_api_layer, SIGNAL(lastEventsRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)),
+            SLOT(lastEventsRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)));
+    connect(jamiat_api_layer, SIGNAL(searchRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)),
+            SLOT(searchRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)));
+    connect(jamiat_api_layer, SIGNAL(updateRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)),
+            SLOT(updateRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)));
+    connect(jamiat_api_layer, SIGNAL(fetchEventsRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)),
+            SLOT(fetchEventsRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)));
+    connect(jamiat_api_layer, SIGNAL(fetchReportsRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)),
+            SLOT(fetchReportsRequestAnswer(qint64,QList<ApiLayer_ItemStruct>)));
+    connect(jamiat_api_layer, SIGNAL(error(QString)), SLOT(error_prv(QString)));
 
     connect(p->refreshTimer, SIGNAL(timeout()), SLOT(refresh()));
     connect(p->garbageTimer, SIGNAL(timeout()), SLOT(clearGarbages()));
@@ -195,6 +200,20 @@ QString MainPageModel::eventId() const
     return p->eventId;
 }
 
+void MainPageModel::setReportMode(bool stt)
+{
+    if(p->reportMode)
+        return;
+
+    p->reportMode = stt;
+    emit reportModeChanged();
+}
+
+bool MainPageModel::reportMode() const
+{
+    return p->reportMode;
+}
+
 int MainPageModel::count() const
 {
     return p->items.count();
@@ -215,24 +234,30 @@ AsemanColorfullListItem *MainPageModel::get(int row)
 
 void MainPageModel::refresh()
 {
+    if(p->reportMode)
+    {
+        qint64 rId = jamiat_api_layer->fetchReportsRequest(0, 10);
+        p->waitingIds.insert(rId);
+    }
+    else
     if(!p->eventId.isEmpty())
     {
         refresh_prv( p->cache->fetchEvents(p->eventId, 10) );
-        qint64 leId = jamiat_api_layer0->lastEventsRequest(p->eventId, 0, 10);
+        qint64 leId = jamiat_api_layer->lastEventsRequest(p->eventId, 0, 10);
         p->waitingIds.insert(leId);
     }
     else
     if(p->keyword.isEmpty())
     {
-        qint64 leId = jamiat_api_layer0->lastEventsRequest(QString(), 0, 1);
-        qint64 udId = jamiat_api_layer0->updateRequest(0, 10);
+        qint64 leId = jamiat_api_layer->lastEventsRequest(QString(), 0, 1);
+        qint64 udId = jamiat_api_layer->updateRequest(0, 10);
 
         p->waitingIds.insert(leId);
         p->waitingIds.insert(udId);
     }
     else
     {
-        qint64 sId = jamiat_api_layer0->searchRequest(p->keyword, 0, 10);
+        qint64 sId = jamiat_api_layer->searchRequest(p->keyword, 0, 10);
         p->waitingIds.insert(sId);
     }
 
@@ -244,7 +269,7 @@ void MainPageModel::showEvents()
 {
     refresh_prv(p->cache->readEvents(10));
 
-    qint64 eId = jamiat_api_layer0->fetchEventsRequest(0, 10);
+    qint64 eId = jamiat_api_layer->fetchEventsRequest(0, 10);
     p->waitingIds.insert(eId);
 
     p->loadMoreState = false;
@@ -258,14 +283,20 @@ void MainPageModel::loadMore()
     if(p->items.isEmpty() || p->items.count()<2)
         return;
 
+    if(p->reportMode)
+    {
+        qint64 rId = jamiat_api_layer->fetchReportsRequest(p->items.count(), 10);
+        p->waitingIds.insert(rId);
+    }
+    else
     if(p->keyword.isEmpty())
     {
-        qint64 udId = jamiat_api_layer0->updateRequest(p->items.count()-1, 10);
+        qint64 udId = jamiat_api_layer->updateRequest(p->items.count()-1, 10);
         p->waitingIds.insert(udId);
     }
     else
     {
-        qint64 sId = jamiat_api_layer0->searchRequest(p->keyword, p->items.count(), 10);
+        qint64 sId = jamiat_api_layer->searchRequest(p->keyword, p->items.count(), 10);
         p->waitingIds.insert(sId);
     }
 
@@ -276,6 +307,11 @@ void MainPageModel::loadMore()
 void MainPageModel::readHistory()
 {
     refresh_prv(p->cache->readUpdates());
+}
+
+void MainPageModel::readReports()
+{
+    refresh_prv(p->cache->readReports());
 }
 
 void MainPageModel::refresh_prv(QList<ApiLayerItemStruct> items)
@@ -337,18 +373,33 @@ void MainPageModel::refresh_prv(QList<ApiLayerItemStruct> items)
             continue;
 
         const ApiLayerItemStruct &item = items.at(i);
-        bool isNews = item.type==ApiLayerItemStruct::NormalPost;
 
         MainPageModelItem *itemObj = new MainPageModelItem(this);
         itemObj->setGuid(item.guid);
         itemObj->setLink(item.link);
-        itemObj->setTitle(isNews? tr("News") : (i==0? tr("Top Event") : tr("Event")) );
         itemObj->setBody(item.description);
         itemObj->setPostTitle(item.title);
         itemObj->setDateText( p->calendar->convertDateTimeToString(item.date) );
-        itemObj->setColor(isNews? QColor("#3b5998") : QColor("#689f38"));
         itemObj->setImages(item.pictures);
         itemObj->setEventId(item.eventId);
+
+        switch(item.type)
+        {
+        case ApiLayer::NormalPost:
+            itemObj->setTitle(tr("News"));
+            itemObj->setColor(QColor("#3b5998"));
+            break;
+
+        case ApiLayer::EventPost:
+            itemObj->setTitle(i==0? tr("Top Event") : tr("Event"));
+            itemObj->setColor(QColor("#689f38"));
+            break;
+
+        case ApiLayer::ReportPost:
+            itemObj->setTitle(tr("Reports"));
+            itemObj->setColor(QColor("#FFA36D"));
+            break;
+        }
 
         beginInsertRows(QModelIndex(), i, i );
         p->items.insert( i, itemObj );
@@ -492,13 +543,30 @@ void MainPageModel::fetchEventsRequestAnswer(qint64 id, const QList<ApiLayerItem
     emit refreshingChanged();
 }
 
+void MainPageModel::fetchReportsRequestAnswer(qint64 id, const QList<ApiLayer_ItemStruct> &items)
+{
+    if(!p->waitingIds.contains(id))
+        return;
+
+    if(p->loadMoreState)
+        p->lastReports << items;
+    else
+        p->lastReports = items;
+
+    refresh_prv(p->lastReports);
+    p->cache->write(items);
+
+    p->waitingIds.remove(id);
+    emit refreshingChanged();
+}
+
 MainPageModel::~MainPageModel()
 {
     all_main_model_objects.remove(this);
     if(all_main_model_objects.isEmpty())
     {
-        delete jamiat_api_layer0;
-        jamiat_api_layer0 = 0;
+        delete jamiat_api_layer;
+        jamiat_api_layer = 0;
     }
     delete p;
 }

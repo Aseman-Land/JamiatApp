@@ -14,7 +14,8 @@ class FacebookRssReaderItem
 public:
     enum PostType {
         NormalPost = 1,
-        EventPost = 2
+        EventPost = 2,
+        ReportPost = 3
     };
 
 private:
@@ -67,6 +68,10 @@ private:
 
     void setEventId(const QString &eventId) {
         _eventId = eventId;
+    }
+
+    void setReportId(const QString &reportId) {
+        _reportId = reportId;
     }
 
     void setType(int type) {
@@ -122,6 +127,10 @@ public:
         return _eventId;
     }
 
+    QString reportId() const {
+        return _reportId;
+    }
+
     int type() const {
         return _type;
     }
@@ -133,6 +142,7 @@ private:
     QString _description;
     QString _html;
     QString _eventId;
+    QString _reportId;
     QDateTime _pubDate;
     QString _author;
     QString _creator;

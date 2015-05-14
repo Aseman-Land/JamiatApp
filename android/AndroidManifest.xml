@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<manifest android:versionName="0.7.0" xmlns:android="http://schemas.android.com/apk/res/android" package="oeg.nilegroup.Jamiat" android:installLocation="auto" android:versionCode="1">
+<manifest android:versionName="0.8.0" xmlns:android="http://schemas.android.com/apk/res/android" package="oeg.nilegroup.Jamiat" android:installLocation="auto" android:versionCode="2">
     <application android:label="Imam Ali Society" android:name="land.aseman.android.AsemanApplication" android:icon="@drawable/icon">
         <activity android:screenOrientation="portrait" android:label="Imam Ali Society" android:configChanges="orientation|uiMode|screenLayout|screenSize|smallestScreenSize|locale|fontScale|keyboard|keyboardHidden|navigation" android:name="land.aseman.android.AsemanActivity">
             <intent-filter>

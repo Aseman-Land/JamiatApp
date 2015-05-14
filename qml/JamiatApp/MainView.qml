@@ -59,7 +59,7 @@ Rectangle {
         width: parent.width
         height: parent.height
         x: viewMode? (View.layoutDirection==Qt.RightToLeft? width : -width) : 0
-        listScale: 1 - (refreshing_item.baseNumber)/5
+        listScale: 1 - (refreshing_item.baseNumber)/10
         listTransformOrigin: Item.Bottom
 
         Behavior on x {
@@ -71,7 +71,8 @@ Rectangle {
         titleBarHeight: 50*Devices.density
         headersHeight: 50*Devices.density
         headerColorHeight: headersHeight
-        titleBarFont.pixelSize: 11*Devices.fontDensity
+        titleBarFont.pixelSize: 13*Devices.fontDensity
+        titleBarFont.family: "B Yekan"
         titleBarDefaultColor: "#689f38"
         model: main_model
 
@@ -109,13 +110,19 @@ Rectangle {
 
             PostItemBase {
                 id: pitem_base
-                width: parent.width
+                width: refresh_post_timer.running? parent.width-20 : parent.width
                 images: modelItem.images
                 postTitle: modelItem.postTitle
                 postBody: modelItem.body.slice(0,limit) + "..."
                 postDate: modelItem.dateText
 
                 property int limit: images.length==0? 2000 : 500
+            }
+
+            Timer {
+                id: refresh_post_timer
+                interval: 100
+                Component.onCompleted: start()
             }
 
             MouseArea {
@@ -175,7 +182,7 @@ Rectangle {
         clip: true
     }
 
-    JamiatRefreshing {
+    JamiatNewRefreshing {
         id: refreshing_item
         anchors.fill: parent
         anchors.topMargin: titleBarHeight

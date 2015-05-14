@@ -19,9 +19,9 @@ SOURCES += main.cpp \
     rssreader.cpp \
     mainservice.cpp \
     jamiatandroidservice.cpp \
-    apilayer0.cpp \
     mainpagemodelitem.cpp \
-    cachedatabase.cpp
+    cachedatabase.cpp \
+    apilayer.cpp
 
 RESOURCES += resource.qrc
 
@@ -34,9 +34,9 @@ HEADERS += \
     jamiatapp.h \
     rssreader.h \
     jamiatandroidservice.h \
-    apilayer0.h \
     mainpagemodelitem.h \
-    cachedatabase.h
+    cachedatabase.h \
+    apilayer.h
 
 DISTFILES += \
     android/AndroidManifest.xml \

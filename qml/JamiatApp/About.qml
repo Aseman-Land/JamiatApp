@@ -39,6 +39,7 @@ Rectangle {
         anchors.topMargin: View.statusBarHeight
         anchors.right: parent.right
         titleFont.pixelSize: 13*Devices.fontDensity
+        titleFont.family: "B Yekan"
         text: qsTr("About")
         light: true
         backButton: false
@@ -151,7 +152,7 @@ Rectangle {
         anchors.bottomMargin: View.navigationBarHeight + 10*Devices.density
         font.family: AsemanApp.globalFont.family
         font.pixelSize: 9*Devices.fontDensity
-        text: "v0.7.0"
+        text: "v0.8.0"
         wrapMode: Text.WordWrap
         color: "#333333"
         horizontalAlignment: Text.AlignRight

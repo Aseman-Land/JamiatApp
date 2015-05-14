@@ -72,7 +72,7 @@ Item {
                 font.pixelSize: Devices.isDesktop? 9*Devices.fontDensity : 8*Devices.fontDensity
                 wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 color: "#333333"
-                textFormat: Text.RichText
+                textFormat: Text.StyledText
                 text: Jamiat.textToHtml(postBody)
                 onLinkActivated: Qt.openUrlExternally(link)
             }

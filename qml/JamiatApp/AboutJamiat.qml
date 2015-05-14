@@ -19,6 +19,7 @@ Rectangle {
         anchors.topMargin: View.statusBarHeight
         anchors.right: parent.right
         titleFont.pixelSize: 13*Devices.fontDensity
+        titleFont.family: "B Yekan"
         text: qsTr("About Jamiat Imam Ali")
         light: true
         backButton: false

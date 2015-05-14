@@ -29,8 +29,8 @@ Rectangle {
 
             Text {
                 anchors.centerIn: parent
-                font.family: AsemanApp.globalFont.family
                 font.pixelSize: 13*Devices.fontDensity
+                font.family: "B Yekan"
                 color: "#ffffff"
                 text: qsTr("Events")
             }

@@ -38,6 +38,7 @@ Rectangle {
         anchors.topMargin: View.statusBarHeight
         anchors.right: parent.right
         titleFont.pixelSize: 13*Devices.fontDensity
+        titleFont.family: "B Yekan"
         text: qsTr("Open Source Licenses")
         light: true
         backButton: false
@@ -138,7 +139,7 @@ Rectangle {
 
             model.append({"title": "Droid fonts", "license": "Apache License v2", "link": "https://www.google.com/fonts/specimen/Droid+Sans", "description": "Droid Sans is a humanist sans serif typeface designed by Steve Matteson, Type Director of Ascender Corp."})
             model.append({"title": "Qt Framework " + Tools.qtVersion(), "license": "GNU GPL v3", "link": "http://qt.io", "description": "Qt is a cross-platform application and UI framework for developers using C++ or QML, a CSS & JavaScript like language."})
-            model.append({"title": "Aseman Qt Tools", "license": "GNU GPL v3", "link": "https://github.com/Aseman-Land/aseman-qt-tools", "description": "Some tools, creating for Aseman Qt projects and used on many of Aseman's projects"})
+            model.append({"title": "Aseman Qt Tools", "license": "GNU GPL v3", "link": "https://github.com/Aseman-Land/aseman-qt-tools", "description": "Aseman Qt tools and light framework for Qt and QML apps."})
 
             focus = true
         }

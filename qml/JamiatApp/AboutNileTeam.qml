@@ -18,7 +18,8 @@ Rectangle {
         anchors.top: parent.top
         anchors.topMargin: View.statusBarHeight
         anchors.right: parent.right
-        titleFont.pixelSize: 13*Devices.fontDensity
+        titleFont.pixelSize: 11*Devices.fontDensity
+        titleFont.family: "Droid Arabic Naskh"
         text: qsTr("About Nile Group")
         light: true
         backButton: false

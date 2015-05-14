@@ -47,6 +47,7 @@ private:
     void destroyDownloader();
 
     QString extractEventId(const QString &text);
+    QString extractReportId(const QString &text);
 
 private:
     RssDownloaderPrivate *p;

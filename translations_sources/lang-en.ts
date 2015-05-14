@@ -292,6 +292,29 @@ Nile create Free and OpenSource projects.</source>
     </message>
 </context>
 <context>
+    <name>JamiatNewRefreshing</name>
+    <message>
+        <source>Drag to Refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Drop Me :((</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Outch!! :(</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Now drop :)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>:|</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>JamiatRefreshing</name>
     <message>
         <source>Refreshing</source>
@@ -310,6 +333,10 @@ Nile create Free and OpenSource projects.</source>
     </message>
     <message>
         <source>Event</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reports</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -339,6 +366,13 @@ Nile create Free and OpenSource projects.</source>
     </message>
 </context>
 <context>
+    <name>ReportsList</name>
+    <message>
+        <source>Reports</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ShareDialog</name>
     <message>
         <source>Select Application</source>
@@ -360,15 +394,15 @@ Nile create Free and OpenSource projects.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>About NileGroup</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Events</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>OpenSource Licenses</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reports</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
