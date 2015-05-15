@@ -6,18 +6,10 @@ AsemanMain {
     height: 640
     width: 480
     focus: true
-    mainFrame: mview
+    mainFrame: stack_view
     color: "#000000"
 
-    property bool menuMode: false
     property alias downloaderQueueCore: downloader_queue
-
-    onMenuModeChanged: {
-        if(menuMode)
-            BackHandler.pushHandler(menu_frame, menu_frame.back)
-        else
-            BackHandler.removeHandler(menu_frame)
-    }
 
     FontLoader{
         id: papyrus_normal_font
@@ -54,42 +46,45 @@ AsemanMain {
         destination: Devices.picturesLocation + "/Jamiat Imam Ali"
     }
 
-    Item {
-        width: parent.width
-        height: parent.height
-        anchors.centerIn: parent
-        scale: menuMode? 0.8 : 1
-        transformOrigin: Item.Bottom
-        clip: true
+    StackViewer {
+        id: stack_view
+        anchors.fill: parent
+        mainDelegate: Item {
+            width: parent.width
+            height: parent.height
+            anchors.centerIn: parent
+            transformOrigin: Item.Bottom
+            clip: true
 
-        Behavior on scale {
-            NumberAnimation{ easing.type: Easing.OutCubic; duration: 400 }
-        }
+            MainView {
+                id: mview
+                anchors.top: stat_back.bottom
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                onError: error_frame.show(text)
+                onSearchRequest: {
+                    mview.search = true
+                }
+            }
 
-        MainView {
-            id: mview
-            anchors.top: stat_back.bottom
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            onError: error_frame.show(text)
-            onSearchRequest: {
-                mview.search = true
+            Rectangle {
+                id: stat_back
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                height: View.statusBarHeight
+                color: mview.titleBarColor
+            }
+
+            ErrorFrame {
+                id: error_frame
             }
         }
+    }
 
-        Rectangle {
-            id: stat_back
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            height: View.statusBarHeight
-            color: mview.titleBarColor
-        }
-
-        ErrorFrame {
-            id: error_frame
-        }
+    Item {
+        anchors.fill: parent
 
         Rectangle {
             anchors.left: parent.left
@@ -133,17 +128,15 @@ AsemanMain {
                         switch(cmd)
                         {
                         case "home":
-                            menuMode = false
+                            stack_view.home()
                             sidebar.discard()
                             return
 
                         case "events":
-                            sidebar.discard()
                             component = events_list_component
                             break
 
                         case "reports":
-                            sidebar.discard()
                             component = reports_list_component
                             break
 
@@ -164,19 +157,9 @@ AsemanMain {
                             break;
                         }
 
-                        menu_hider.restart()
-                        if(component) {
-                            var item = component.createObject(menu_frame)
-                            menu_frame.item = item
-                        }
-
-                        menuMode = true
-                    }
-
-                    Timer {
-                        id: menu_hider
-                        interval: 400
-                        onTriggered: sidebar.discard()
+                        sidebar.discard()
+                        if(component)
+                            stack_view.append(component)
                     }
                 }
 
@@ -194,8 +177,9 @@ AsemanMain {
         Button {
             id: jamiat_btn
             x: View.layoutDirection==Qt.RightToLeft? parent.width-width : 0
-            anchors.top: mview.top
-            height: mview.titleBarHeight - anchors.margins*2
+            anchors.top: parent.top
+            anchors.topMargin: View.statusBarHeight
+            height: Devices.standardTitleBarHeight - anchors.margins*2
             icon: "files/icon.png"
             normalColor: "#00000000"
             highlightColor: "#44ffffff"
@@ -212,31 +196,6 @@ AsemanMain {
                 sourceSize: Qt.size(width,height)
                 source: "files/menu.png"
             }
-        }
-    }
-
-    Rectangle {
-        id: menu_frame
-        color: "#ededed"
-        y: menuMode? 0 : height
-        width: parent.width
-        height: parent.height
-
-        property variant item
-
-        Behavior on y {
-            NumberAnimation{ easing.type: Easing.OutCubic; duration: 400 }
-        }
-
-        function back() {
-            menuMode = false
-            item_destroyer.restart()
-        }
-
-        Timer {
-            id: item_destroyer
-            interval: 400
-            onTriggered: if(menu_frame.item) menu_frame.item.destroy()
         }
     }
 

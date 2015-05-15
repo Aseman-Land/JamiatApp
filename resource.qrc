@@ -36,5 +36,6 @@
         <file>qml/JamiatApp/files/menu-opensource.png</file>
         <file>qml/JamiatApp/files/menu-reports.png</file>
         <file>fonts/BYekan.ttf</file>
+        <file>qml/JamiatApp/StackViewer.qml</file>
     </qresource>
 </RCC>
