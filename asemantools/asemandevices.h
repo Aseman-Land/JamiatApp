@@ -36,6 +36,7 @@ class AsemanDevices : public QObject
     Q_PROPERTY(bool isDesktop      READ isDesktop      NOTIFY isDesktopChanged      )
     Q_PROPERTY(bool isMacX         READ isMacX         NOTIFY isMacXChanged         )
     Q_PROPERTY(bool isWindows      READ isWindows      NOTIFY isWindowsChanged      )
+    Q_PROPERTY(bool isWindows8     READ isWindows8     NOTIFY isWindowsChanged      )
     Q_PROPERTY(bool isLinux        READ isLinux        NOTIFY isLinuxChanged        )
     Q_PROPERTY(bool isAndroid      READ isAndroid      NOTIFY isAndroidChanged      )
     Q_PROPERTY(bool isIOS          READ isIOS          NOTIFY isIOSChanged          )
@@ -43,6 +44,8 @@ class AsemanDevices : public QObject
     Q_PROPERTY(bool isWindowsPhone READ isWindowsPhone NOTIFY isWindowsPhoneChanged )
 
     Q_PROPERTY(QObject* screen READ screenObj NOTIFY screenChanged )
+
+    Q_PROPERTY(bool cameraIsAvailable READ cameraIsAvailable NOTIFY cameraIsAvailableChanged)
 
     Q_PROPERTY(qreal lcdPhysicalSize   READ lcdPhysicalSize   NOTIFY lcdPhysicalSizeChanged   )
     Q_PROPERTY(qreal lcdPhysicalWidth  READ lcdPhysicalWidth  NOTIFY lcdPhysicalWidthChanged  )
@@ -91,6 +94,7 @@ public:
     bool isIOS() const;
     bool isUbuntuTouch() const;
     bool isWindowsPhone() const;
+    bool isWindows8() const;
 
     QScreen *screen() const;
     QObject *screenObj() const;
@@ -107,6 +111,8 @@ public:
     int densityDpi() const;
     qreal density() const;
     qreal fontDensity() const;
+
+    bool cameraIsAvailable() const;
 
     static QString localFilesPrePath();
 
@@ -159,6 +165,8 @@ signals:
     void isIOSChanged();
     void isUbuntuTouchChanged();
     void isWindowsPhoneChanged();
+
+    void cameraIsAvailableChanged();
 
     void screenChanged();
     void localFilesPrePathChanged();

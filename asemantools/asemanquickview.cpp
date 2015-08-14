@@ -40,6 +40,10 @@
 #include "asemanautostartmanager.h"
 #include "asemanmimeapps.h"
 #include "asemanwebpagegrabber.h"
+#include "asemantitlebarcolorgrabber.h"
+#include "asemantaskbarbutton.h"
+#include "asemanmapdownloader.h"
+#include "asemandragarea.h"
 #ifdef Q_OS_ANDROID
 #include "asemanjavalayer.h"
 #endif
@@ -74,7 +78,9 @@ public:
     QPointer<QObject> root;
     QPointer<QQuickItem> focused_text;
 
+    bool tryClose;
     bool fullscreen;
+    bool backController;
     int layoutDirection;
 
 #ifdef ASEMAN_QML_PLUGIN
@@ -107,7 +113,9 @@ AsemanQuickView::AsemanQuickView(int options, QWindow *parent) :
     p->calendar = 0;
     p->back_handler = 0;
     p->fullscreen = false;
+    p->backController = false;
     p->layoutDirection = Qt::LeftToRight;
+    p->tryClose  = false;
 
 #ifndef ASEMAN_QML_PLUGIN
     engine()->rootContext()->setContextProperty( "AsemanApp", AsemanApplication::instance() );
@@ -131,6 +139,10 @@ AsemanQuickView::AsemanQuickView(int options, QWindow *parent) :
     qmlRegisterType<AsemanFileDownloaderQueue>("AsemanTools", 1,0, "FileDownloaderQueue");
     qmlRegisterType<AsemanMimeApps>("AsemanTools", 1,0, "MimeApps");
     qmlRegisterType<AsemanWebPageGrabber>("AsemanTools", 1,0, "WebPageGrabber");
+    qmlRegisterType<AsemanTitleBarColorGrabber>("AsemanTools", 1,0, "TitleBarColorGrabber");
+    qmlRegisterType<AsemanTaskbarButton>("AsemanTools", 1,0, "TaskbarButton");
+    qmlRegisterType<AsemanMapDownloader>("AsemanTools", 1,0, "MapDownloader");
+    qmlRegisterType<AsemanDragArea>("AsemanTools", 1,0, "MouseDragArea");
 
 #ifdef ASEMAN_SENSORS
     qmlRegisterType<AsemanSensors>("AsemanTools", 1,0, "AsemanSensors");
@@ -209,12 +221,26 @@ bool AsemanQuickView::fullscreen() const
     return p->fullscreen;
 }
 
+void AsemanQuickView::setBackController(bool stt)
+{
+    if(p->backController == stt)
+        return;
+
+    p->backController = stt;
+    emit backControllerChanged();
+}
+
+bool AsemanQuickView::backController() const
+{
+    return p->backController;
+}
+
 qreal AsemanQuickView::statusBarHeight() const
 {
     if( !p->devices )
         return 0;
 
-    return p->devices->transparentStatusBar() && !fullscreen()? 20*p->devices->density() : 0;
+    return p->devices->transparentStatusBar() && !fullscreen()? 24*p->devices->density() : 0;
 }
 
 qreal AsemanQuickView::navigationBarHeight() const
@@ -296,6 +322,34 @@ qreal AsemanQuickView::flickVelocity() const
 void AsemanQuickView::discardFocusedText()
 {
     setFocusedText(0);
+}
+
+void AsemanQuickView::tryClose()
+{
+    p->tryClose = true;
+    close();
+}
+
+bool AsemanQuickView::event(QEvent *e)
+{
+    switch( static_cast<int>(e->type()) )
+    {
+    case QEvent::Close:
+        if(p->backController)
+        {
+            QCloseEvent *ce = static_cast<QCloseEvent*>(e);
+            if( p->tryClose || p->devices->isDesktop() )
+                ce->accept();
+            else
+            {
+                ce->ignore();
+                emit closeRequest();
+            }
+        }
+        break;
+    }
+
+    return INHERIT_VIEW::event(e);
 }
 
 void AsemanQuickView::init_options()

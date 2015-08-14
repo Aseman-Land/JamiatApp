@@ -46,6 +46,7 @@ public slots:
     static QString fileName( const QString & path );
     static QString fileSuffix( const QString & path );
     static QString readText( const QString & path );
+    static QStringList filesOf(const QString &path);
 
     static QStringList stringLinks(const QString &str);
 
@@ -73,6 +74,7 @@ public slots:
     static QString htmlToPlaintText(const QString &html);
 
     static void copyDirectory( const QString & src, const QString & dst );
+    static void deleteFile(const QString &file);
 
     static void setProperty( QObject *obj, const QString & property, const QVariant & v );
     static QVariant property( QObject *obj, const QString & property );

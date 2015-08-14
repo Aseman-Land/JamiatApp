@@ -26,17 +26,6 @@ Rectangle {
 
     ListObject {
         id: list
-        onCountChanged: {
-            if(count == 0 && lastCount > count)
-                BackHandler.removeHandler(stack_viewer)
-            else
-            if(count == 1 && lastCount < count)
-                BackHandler.pushHandler(stack_viewer, stack_viewer.back)
-
-            lastCount = count
-        }
-
-        property int lastCount: 0
     }
 
     Rectangle {
@@ -85,8 +74,16 @@ Rectangle {
             Component.onCompleted: {
                 index = list.count
                 item = cmpnt.createObject(single_scene_item)
+            }
+
+            Component.onDestruction: {
+                BackHandler.removeHandler(single_scene_item)
+            }
+
+            function show() {
                 y = 0
                 anims = true
+                BackHandler.pushHandler(single_scene_item, single_scene_item.back)
             }
 
             function close() {
@@ -100,25 +97,26 @@ Rectangle {
                 item.destroy()
                 destroy()
             }
+
+            function back() {
+                stack_viewer.back()
+            }
         }
     }
 
     function append(component) {
         var obj = single_scene_component.createObject(stack_viewer, {"cmpnt": component})
         list.append(obj)
+
+        obj.show()
     }
 
     function back() {
         if(list.count == 0)
-            return true
+            return
 
         var obj = list.takeLast()
         obj.close()
-
-        if(list.count == 0)
-            return true
-        else
-            return false
     }
 
     function home() {

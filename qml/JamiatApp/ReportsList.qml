@@ -142,7 +142,7 @@ Rectangle {
     MaterialDesignButton {
         id: materialDesignButton
         anchors.fill: parent
-        buttonColor: "#FA9401"
+        buttonColor: "#FFA36D"
         buttonIcon: "files/share-light.png"
         onClicked: {
             startIndicator(1000)

@@ -43,6 +43,16 @@
 #include <QDebug>
 #include <QMimeData>
 
+#ifdef ASEMAN_MULTIMEDIA
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0))
+#include <QCameraInfo>
+#endif
+#endif
+
+#ifdef Q_OS_WIN
+#include <QSysInfo>
+#endif
+
 class AsemanDevicesPrivate
 {
 public:
@@ -134,7 +144,7 @@ bool AsemanDevices::isWindows() const
 
 bool AsemanDevices::isLinux() const
 {
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_OPENBSD)
     return true;
 #else
     return false;
@@ -172,6 +182,16 @@ bool AsemanDevices::isWindowsPhone() const
 {
 #ifdef Q_OS_WINPHONE
     return true;
+#else
+    return false;
+#endif
+}
+
+bool AsemanDevices::isWindows8() const
+{
+#ifdef Q_OS_WIN
+    return QSysInfo::windowsVersion() == QSysInfo::WV_WINDOWS8 ||
+           QSysInfo::windowsVersion() == QSysInfo::WV_WINDOWS8_1;
 #else
     return false;
 #endif
@@ -313,7 +333,7 @@ qreal AsemanDevices::density() const
     qreal ratio = isTablet()? 1.28 : 1;
     return ratio*densityDpi()/180.0;
 #else
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_OPENBSD)
 #ifdef Q_OS_UBUNTUTOUCH
     return screen()->logicalDotsPerInch()/UTOUCH_DEFAULT_DPI;
 #else
@@ -339,7 +359,7 @@ qreal AsemanDevices::fontDensity() const
 #ifdef Q_OS_IOS
     return 1.4;
 #else
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_OPENBSD)
 #ifdef Q_OS_UBUNTUTOUCH
     qreal ratio = 1.3;
     return ratio*density();
@@ -357,6 +377,19 @@ qreal AsemanDevices::fontDensity() const
 #endif
 #endif
 #endif
+#endif
+}
+
+bool AsemanDevices::cameraIsAvailable() const
+{
+#ifdef ASEMAN_MULTIMEDIA
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 3, 0))
+    return QCameraInfo::availableCameras().count();
+#else
+    return false;
+#endif
+#else
+    return false;
 #endif
 }
 

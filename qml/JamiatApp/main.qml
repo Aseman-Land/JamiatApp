@@ -99,13 +99,7 @@ AsemanMain {
             id: sidebar
             anchors.fill: parent
             anchors.bottomMargin: View.navigationBarHeight
-            menuWidth: {
-                var result = parent.width/2 + 50*Devices.density
-                if(result < 200*Devices.density)
-                    result = parent.width-80*Devices.density
-
-                return result
-            }
+            menuWidth: Devices.isMobile? parent.width-50*Devices.density : parent.width/2 + 50*Devices.density
 
             delegate: MouseArea {
                 anchors.fill: parent
